@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Curso {
+  id              String    @id
+  nombre          String
+  codigo          String    @unique
+  descripcion     String
+  color           String
+  proposito       String?
+  contenidos      String[]
+  programaOficial String?
+  recursos        Recurso[]
+}
+
+model Recurso {
+  id       Int    @id @default(autoincrement())
+  tipo     String
+  titulo   String
+  url      String
+  duracion String?
+  tamano   String?
+  cursoId  String
+  curso    Curso  @relation(fields: [cursoId], references: [id])
+}
+
+model Estudiante {
+  id        Int    @id @default(autoincrement())
+  nombre    String
+  matricula String @unique
+  programa  String
+  foto      String?
+}
+
+model Insignia {
+  id          Int    @id @default(autoincrement())
+  nombre      String
+  nivel       String
+  descripcion String
+  icon        String
+  color       String
+  requisito   Int
+}
+
+model Alumno {
+  id       Int    @id @default(autoincrement())
+  nombre   String
+  apellido String  @default("")
+  email    String  @unique
+  grupo    String  @default("")
+  password String  @default("")
+  rol      String  @default("ALUMNO")
+  estado   String  @default("ACTIVO")
+  verificationCodes VerificationCode[]
+}
+
+model Unidad {
+  id         Int         @id @default(autoincrement())
+  nombre     String
+  contenidos Contenido[]
+}
+
+model Contenido {
+  id           Int           @id @default(autoincrement())
+  titulo       String
+  descripcion  String
+  tipo         TipoContenido @default(LECCION)
+  tipoMateria  TipoMateria   @default(TEORIA_DE_LENGUAJES)
+  orden        Int
+  url_recurso  String?
+  contenido    String[]
+  unidadId     Int
+  unidad       Unidad        @relation(fields: [unidadId], references: [id])
+  videos       Video[]
+  asignaciones Asignacion[]
+}
+
+model Video {
+  id          Int           @id @default(autoincrement())
+  titulo      String
+  descripcion String        @default("")
+  youtubeUrl  String
+  youtubeId   String
+  tipos       TipoVideo[]
+  publicado   Boolean       @default(true)
+  contenidoId Int?
+  contenido   Contenido?    @relation(fields: [contenidoId], references: [id])
+  asignaciones Asignacion[]
+}
+
+model Asignacion {
+  id          Int       @id @default(autoincrement())
+  titulo      String
+  descripcion String    @default("")
+  porcentaje  Int       @default(0)
+  periodo     Int
+  grupo       String    @default("")
+  entregable  Boolean   @default(true)
+  rubrica     String    @default("")
+  orden       Int       @default(0)
+  activa      Boolean   @default(true)
+  contenidoId Int?
+  contenido   Contenido? @relation(fields: [contenidoId], references: [id])
+  videos      Video[]
+}
+
+enum TipoContenido {
+  LECCION
+  RECURSO
+  TAREA
+}
+
+enum TipoMateria {
+  COMPILADORES
+  TEORIA_DE_LA_COMPUTACION
+  TEORIA_DE_LENGUAJES
+}
+
+enum TipoVideo {
+  APRENDIZAJE
+  ACTIVIDAD
+  OTRO
+}
+
+model Rubrica {
+  id        Int    @id @default(autoincrement())
+  titulo    String
+  criterios String
+  url       String
+  periodo   Int
+}
+
+model VerificationCode {
+  id        String   @id @default(uuid())
+  code      String   
+  createdAt DateTime @default(now())
+  expiresAt DateTime 
+  alumnoId  Int
+  alumno    Alumno   @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
+
+  @@index([alumnoId])
+}

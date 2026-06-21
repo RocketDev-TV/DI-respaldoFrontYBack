@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # --- BASE DE DATOS ---
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: project_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: tu_password_seguro
+      POSTGRES_DB: project_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # --- BACKEND (NestJS) ---
+  backend:
+    build:
+      context: ./Back_Oficial
+      dockerfile: Dockerfile
+    container_name: project_backend
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: "postgresql://postgres:tu_password_seguro@postgres_db:5432/project_db?schema=public"
+      PORT: 3001
+      NODE_ENV: production
+    depends_on:
+      - postgres_db
+
+  # --- FRONTEND (React) ---
+  frontend:
+    build:
+      context: ./Front_Oficial
+      dockerfile: Dockerfile # Necesitaremos crear uno rápido para el Front
+    container_name: project_frontend
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - REACT_APP_GRAPHQL_API_URL=http://192.168.100.170:3001/graphql
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
