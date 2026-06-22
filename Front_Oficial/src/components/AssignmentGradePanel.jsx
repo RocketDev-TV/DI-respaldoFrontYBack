@@ -102,9 +102,13 @@ const AssignmentGradePanel = () => {
   }, [grupo, parcial]);
 
   React.useEffect(() => {
-    if (window.lucide) {
-      window.lucide.createIcons();
-    }
+    const timer = setTimeout(() => {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [alumnosFiltrados, asignaciones, entregasRegistradas, previewInfo]);
 
   const obtenerCalificacion = (estudianteId, asignacionId) =>
