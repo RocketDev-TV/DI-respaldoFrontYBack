@@ -370,7 +370,7 @@ const AssignmentGradePanel = () => {
                                 <button key={estaDescargando ? 'loading' : 'ready'} onClick={() => handleDescargarArchivo(entrega)} disabled={estaDescargando} title="Descargar" className="p-2 rounded-md bg-white border border-green-200 text-green-700 shadow-sm hover:bg-green-50 transition-colors">                                  
                                   <i data-lucide={estaDescargando ? "loader-2" : "download"} className={`w-4 h-4 ${estaDescargando ? "animate-spin" : ""}`}></i>
                                 </button>
-                                <button key={estaDevolver ? 'loading' : 'ready'} onClick={() => handleDevolverEntrega(entrega)} title="Devolver" className="p-2 rounded-md bg-white border border-red-200 text-red-600 shadow-sm hover:bg-red-50 transition-colors">
+                                <button key="btn-devolver" onClick={() => handleDevolverEntrega(entrega)} title="Devolver" className="p-2 rounded-md bg-white border border-red-200 text-red-600 shadow-sm hover:bg-red-50 transition-colors">                                  
                                   <i data-lucide="rotate-ccw" className="w-4 h-4"></i>
                                 </button>
                               </>
