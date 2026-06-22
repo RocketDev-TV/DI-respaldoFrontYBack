@@ -20,6 +20,8 @@ services:
     build:
       context: ./Back_Oficial
       dockerfile: Dockerfile
+    env_file:
+      - ./Back_Oficial/.env
     container_name: project_backend
     restart: always
     ports:
@@ -28,6 +30,8 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:tu_password_seguro@postgres_db:5432/project_db?schema=public&sslmode=disable
       - PORT=3001
+      - AUTH_SECRET=dev-auth-secret-change-me
+      - AUTH_TRANSPORT_SECRET=local-dev-transport-secret-2025
     depends_on:
       - postgres_db
 
