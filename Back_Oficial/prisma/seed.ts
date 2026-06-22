@@ -53,8 +53,10 @@ const UNIT_ID_OFFSET: Record<TipoMateriaValue, number> = {
 
 function cargarMock(): MockContenido[] {
   const posiblesRutas = [
+    '/app/src/data/mockGuionDidactico.js',
     resolve(process.cwd(), 'src/data/mockGuionDidactico.js'),
     resolve(process.cwd(), '../Front_Oficial/src/data/mockGuionDidactico.js'),
+    resolve(process.cwd(), 'Back_Oficial/src/data/mockGuionDidactico.js'),
     resolve(process.cwd(), '../Back_Oficial/src/data/mockGuionDidactico.js'),
     resolve(process.cwd(), '../Instruccional/src/data/mockGuionDidactico.js'),
     resolve(process.cwd(), '../compiladores/src/data/mockGuionDidactico.js'),
