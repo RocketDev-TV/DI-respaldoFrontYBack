@@ -78,6 +78,7 @@ export function decodeIncomingPassword(value: string) {
   const [, ivBase64, cipherBase64] = value.split('::');
 
   if (!ivBase64 || !cipherBase64) {
+    console.error('Error: Formato cifrado inválido');
     throw new Error('Formato de contraseña cifrada inválido');
   }
 
@@ -93,8 +94,13 @@ export function decodeIncomingPassword(value: string) {
   const decipher = createDecipheriv('aes-256-gcm', buildTransportKey(), iv);
   decipher.setAuthTag(authTag);
 
-  const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
-  return decrypted.toString('utf8');
+  try {
+    const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+    return decrypted.toString('utf8');
+  } catch (e) {
+    console.error('Error de desencriptación (¿llave incorrecta?):', e); // <-- AGREGA ESTO
+    throw e;
+  }
 }
 
 export function hashPassword(password: string) {
