@@ -51,35 +51,51 @@ export class AlumnoService {
   }
 
   async login(datos: LoginAlumnoInput): Promise<AuthPayload> {
+    console.log(`[DEBUG LOGIN] Intentando login para: ${datos.email}`);
+    
     const usuario = await this.prisma.alumno.findUnique({
       where: { email: datos.email.toLowerCase().trim() },
     });
 
     if (!usuario) {
+      console.log(`[DEBUG LOGIN] Usuario no encontrado: ${datos.email}`);
       throw new UnauthorizedException('El usuario no existe');
     }
 
     if (usuario.estado !== EstadoUsuario.ACTIVO) {
+      console.log(`[DEBUG LOGIN] Usuario inactivo: ${datos.email}`);
       throw new UnauthorizedException('La cuenta esta inactiva');
     }
 
-    const passwordPlano = decodeIncomingPassword(datos.password);
+    try {
+      const passwordPlano = decodeIncomingPassword(datos.password);
+      console.log(`[DEBUG LOGIN] Password desencriptado exitosamente`);
+      
+      const esValida = verifyPassword(passwordPlano, usuario.password);
+      console.log(`[DEBUG LOGIN] Resultado de verifyPassword: ${esValida}`);
 
-    if (!verifyPassword(passwordPlano, usuario.password)) {
-      throw new UnauthorizedException('Contraseña incorrecta');
+      if (!esValida) {
+        console.log(`[DEBUG LOGIN] Contraseña incorrecta para: ${datos.email}`);
+        throw new UnauthorizedException('Contraseña incorrecta');
+      }
+
+      if (!isPasswordHashed(usuario.password)) {
+        console.log(`[DEBUG LOGIN] Password en texto plano detectado, actualizando a hash...`);
+        await this.prisma.alumno.update({
+          where: { id: usuario.id },
+          data: { password: hashPassword(passwordPlano) },
+        });
+      }
+
+      return {
+        token: createAuthToken(this.toSessionUser(usuario)),
+        usuario,
+      };
+
+    } catch (error) {
+      console.error(`[DEBUG LOGIN] Error crítico durante login:`, error);
+      throw new UnauthorizedException('Error al procesar credenciales');
     }
-
-    if (!isPasswordHashed(usuario.password)) {
-      await this.prisma.alumno.update({
-        where: { id: usuario.id },
-        data: { password: hashPassword(passwordPlano) },
-      });
-    }
-
-    return {
-      token: createAuthToken(this.toSessionUser(usuario)),
-      usuario,
-    };
   }
 
   async updateUsuario(datos: UpdateUsuarioInput) {
