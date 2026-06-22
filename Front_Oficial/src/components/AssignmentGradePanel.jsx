@@ -309,8 +309,11 @@ const AssignmentGradePanel = () => {
       
       {loading ? (
         <div className="p-12 flex flex-col items-center justify-center text-gray-400 bg-white rounded-2xl border border-gray-200">
-           <i data-lucide="loader-2" className="w-8 h-8 animate-spin mb-2"></i>
-           <p className="text-sm">Cargando asignaciones...</p>
+          <svg className="w-8 h-8 animate-spin mb-2 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>           
+          <p className="text-sm">Cargando asignaciones...</p>
         </div>
       ) : asignaciones.length === 0 ? (
         <div className="p-12 text-center bg-white rounded-2xl border border-gray-200">
@@ -361,13 +364,13 @@ const AssignmentGradePanel = () => {
                           <div className="flex gap-2">
                             {isEntregado && (
                               <>
-                                <button onClick={() => handleVerPreview(entrega)} disabled={estaCargandoPreview} title="Ver previa" className="p-2 rounded-md bg-white border border-blue-200 text-blue-600 shadow-sm hover:bg-blue-50 transition-colors">
+                                <button key={estaCargandoPreview ? 'loading' : 'ready'} onClick={() => handleVerPreview(entrega)} disabled={estaCargandoPreview} title="Ver previa" className="p-2 rounded-md bg-white border border-blue-200 text-blue-600 shadow-sm hover:bg-blue-50 transition-colors">                                  
                                   <i data-lucide={estaCargandoPreview ? "loader-2" : "eye"} className={`w-4 h-4 ${estaCargandoPreview ? "animate-spin" : ""}`}></i>
                                 </button>
-                                <button onClick={() => handleDescargarArchivo(entrega)} disabled={estaDescargando} title="Descargar" className="p-2 rounded-md bg-white border border-green-200 text-green-700 shadow-sm hover:bg-green-50 transition-colors">
+                                <button key={estaDescargando ? 'loading' : 'ready'} onClick={() => handleDescargarArchivo(entrega)} disabled={estaDescargando} title="Descargar" className="p-2 rounded-md bg-white border border-green-200 text-green-700 shadow-sm hover:bg-green-50 transition-colors">                                  
                                   <i data-lucide={estaDescargando ? "loader-2" : "download"} className={`w-4 h-4 ${estaDescargando ? "animate-spin" : ""}`}></i>
                                 </button>
-                                <button onClick={() => handleDevolverEntrega(entrega)} title="Devolver" className="p-2 rounded-md bg-white border border-red-200 text-red-600 shadow-sm hover:bg-red-50 transition-colors">
+                                <button key={estaDevolver ? 'loading' : 'ready'} onClick={() => handleDevolverEntrega(entrega)} title="Devolver" className="p-2 rounded-md bg-white border border-red-200 text-red-600 shadow-sm hover:bg-red-50 transition-colors">
                                   <i data-lucide="rotate-ccw" className="w-4 h-4"></i>
                                 </button>
                               </>
