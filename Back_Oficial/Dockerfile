@@ -1,3 +1,11 @@
+# --- ETAPA 1: Construcción ---
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
 # --- ETAPA 2: Producción ---
 FROM node:18-alpine
 WORKDIR /app
@@ -11,6 +19,7 @@ RUN npm install --only=production
 COPY --from=build /app/dist ./dist
 # Si usas Prisma, necesitamos copiar el esquema
 COPY --from=build /app/prisma ./prisma
+# Copiamos la carpeta de datos para el seed
 COPY --from=build /app/src/data ./src/data
 
 # Corremos la migración (opcional pero recomendado)
