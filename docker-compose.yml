@@ -15,7 +15,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # --- BACKEND (NestJS) ---
+# --- BACKEND (NestJS) ---
   backend:
     build:
       context: ./Back_Oficial
@@ -25,9 +25,9 @@ services:
     ports:
       - "3001:3001"
     environment:
-      DATABASE_URL: "postgresql://postgres:tu_password_seguro@postgres_db:5432/project_db?schema=public"
-      PORT: 3001
-      NODE_ENV: production
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:tu_password_seguro@postgres_db:5432/project_db?schema=public&sslmode=disable
+      - PORT=3001
     depends_on:
       - postgres_db
 
@@ -35,13 +35,15 @@ services:
   frontend:
     build:
       context: ./Front_Oficial
+      args:
+      - REACT_APP_GRAPHQL_API_URL=https://anton-server.tailb29b29.ts.net/graphql
       dockerfile: Dockerfile # Necesitaremos crear uno rápido para el Front
     container_name: project_frontend
     restart: always
     ports:
-      - "80:80"
+      - "8080:80"
     environment:
-      - REACT_APP_GRAPHQL_API_URL=http://192.168.100.170:3001/graphql
+      - REACT_APP_GRAPHQL_API_URL=https://anton-server.tailb29b29.ts.net/graphql
     depends_on:
       - backend
 

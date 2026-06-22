@@ -1,4 +1,4 @@
-import { getGraphqlApiUrl } from './apiConfig';
+import { getGraphqlApiUrl } from './apiConfig.js';
 import { obtenerSesionAuth } from '../utils/localStorage';
 import { encryptPassword } from '../utils/secureAuth';
 
