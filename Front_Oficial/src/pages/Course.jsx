@@ -7,6 +7,7 @@ const asset = (fileName) => `/${encodeURI(fileName)}`;
 
 const Course = ({ courseName, currentPeriod, onPeriodChange, onNavigate }) => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showPirateModal, setShowPirateModal] = useState(false); // Estado para el modal del juego interactivo
   const [leccionActiva, setLeccionActiva] = useState(null);
   const [unidades, setUnidades] = useState([]);
   const [loadingUnidades, setLoadingUnidades] = useState(false);
@@ -78,7 +79,7 @@ const Course = ({ courseName, currentPeriod, onPeriodChange, onNavigate }) => {
         window.lucide.createIcons();
       }, 50);
     }
-  }, [unidades, loadingUnidades, errorUnidades]);
+  }, [unidades, loadingUnidades, errorUnidades, showPirateModal]); // Re-renderiza iconos al abrir el modal
 
   const contenidosOrdenados = unidades.flatMap(({ contenidos }) => contenidos);
   const indiceLeccionActiva = contenidosOrdenados.findIndex(
@@ -118,12 +119,12 @@ const Course = ({ courseName, currentPeriod, onPeriodChange, onNavigate }) => {
     );
   }
 
-  // Datos simulados para los documentos
+  // Datos para los documentos del aula
   const documents = {
     contrato: asset('ContratoDidáctico.docx'),
     introEvaluacion: 'https://www.youtube.com/embed/dummy',
     rubricas: [
-      { titulo: 'Lista de cotejo', file: asset('______LISTA_COTEJO_1P_Marzo2026.docx') },
+      { titulo: 'Lista de cortejo', file: asset('______LISTA_COTEJO_1P_Marzo2026.docx') },
       { titulo: 'Hoja de respuestas', file: asset('HojaRespuestas_ParaLlenar.pdf') },
       { titulo: 'Puntos básicos para un ensayo', file: asset('Puntos basicos para un ENSAYO.pdf') },
       { titulo: 'Apuntes TLC 2023', file: asset('APUNTES_TLC_2023.pdf') },
@@ -203,7 +204,7 @@ const Course = ({ courseName, currentPeriod, onPeriodChange, onNavigate }) => {
         </div>
       </div>
 
-      {/* Grid principal de documentos (fondo verde en los enlaces) */}
+      {/* Grid principal de documentos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Contrato Didáctico */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
@@ -323,6 +324,29 @@ const Course = ({ courseName, currentPeriod, onPeriodChange, onNavigate }) => {
           </div>
         </div>
 
+        {/* NUEVO MÓDULO: Mundo Pirata (Gamificación Condicional para Teoría de la Computación) */}
+        {courseName === 'Teoría de la Computación.' && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition animate-in fade-in duration-300">
+            <div className="bg-amber-600 h-2"></div>
+            <div className="p-5">
+              <h3 className="font-bold text-gray-800 flex items-center gap-2 mb-2">
+                <i data-lucide="gamepad-2" className="text-amber-600 w-5 h-5"></i>
+                Mundo Pirata: Autómatas
+              </h3>
+              <p className="text-xs text-gray-500 mb-3">
+                Juego interactivo interactivo para comprender y repasar autómatas finitos.
+              </p>
+              <button
+                onClick={() => setShowPirateModal(true)}
+                className="inline-flex items-center gap-2 bg-amber-100 hover:bg-amber-200 text-amber-800 text-sm px-4 py-2 rounded-lg w-full justify-center font-medium transition-colors"
+              >
+                <i data-lucide="play" className="w-4 h-4"></i>
+                Explorar Actividad
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Guías de Estudio */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
           <div className="bg-green-600 h-2"></div>
@@ -414,6 +438,7 @@ const Course = ({ courseName, currentPeriod, onPeriodChange, onNavigate }) => {
           </div>
         </div>
 
+        {/* Material Adicional */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
           <div className="bg-green-600 h-2"></div>
           <div className="p-5">
@@ -456,114 +481,168 @@ const Course = ({ courseName, currentPeriod, onPeriodChange, onNavigate }) => {
           </div>
         </div>
       </div>
-      {/* guion */}
-      <>
-        <div className="mt-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
-            <div className="bg-green-600 h-2"></div>
-            <div className="p-5">
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                  <i data-lucide="book" className="text-green-600 w-5 h-5"></i>
-                  Guión Didáctico
-                </h3>
-                <a
-                  href={documents.guionDidactico}
-                  download
-                  className="inline-flex items-center gap-2 rounded-lg bg-green-100 px-3 py-2 text-sm text-green-800 hover:bg-green-200"
-                >
-                  <i data-lucide="download" className="w-4 h-4"></i>
-                  Descargar archivo
-                </a>
+
+      {/* Guión Didáctico */}
+      <div className="mt-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
+          <div className="bg-green-600 h-2"></div>
+          <div className="p-5">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                <i data-lucide="book" className="text-green-600 w-5 h-5"></i>
+                Guión Didáctico
+              </h3>
+              <a
+                href={documents.guionDidactico}
+                download
+                className="inline-flex items-center gap-2 rounded-lg bg-green-100 px-3 py-2 text-sm text-green-800 hover:bg-green-200"
+              >
+                <i data-lucide="download" className="w-4 h-4"></i>
+                Descargar archivo
+              </a>
+            </div>
+
+            {loadingUnidades && (
+              <div className="rounded-lg border border-green-100 bg-green-50 px-4 py-3 text-sm text-green-800">
+                Cargando contenidos desde `Project-Site-Backend`...
               </div>
+            )}
 
-              {loadingUnidades && (
-                <div className="rounded-lg border border-green-100 bg-green-50 px-4 py-3 text-sm text-green-800">
-                  Cargando contenidos desde `Project-Site-Backend`...
-                </div>
-              )}
-
-              {!loadingUnidades && errorUnidades && (
-                <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {errorUnidades}
-                </div>
-              )}
-
-              {!loadingUnidades && !errorUnidades && unidades.length === 0 && (
-                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-                  No hay unidades publicadas para esta materia.
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                {unidades.map(({ unidad, contenidos }) => (
-                  <div key={unidad.unidad_id} className="bg-green-50 rounded-lg p-5 space-y-3">
-
-                    <p className="text-sm font-bold text-green-800 border-b border-green-200 pb-2">
-                      {unidad.nombre}
-                    </p>
-
-                    {contenidos.map((contenido) => (
-                      <div key={contenido.contenido_id} className="flex items-start justify-between gap-3 py-1">
-                        <span className="text-sm text-gray-700 leading-snug">
-                          {contenido.titulo}
-                        </span>
-                        <button
-                          onClick={() => setLeccionActiva(contenido)}
-                          className="text-green-700 hover:text-green-900 shrink-0"
-                        >
-                          <i data-lucide="arrow-big-right" className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-
-                  </div>
-                ))}
+            {!loadingUnidades && errorUnidades && (
+              <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {errorUnidades}
               </div>
+            )}
 
+            {!loadingUnidades && !errorUnidades && unidades.length === 0 && (
+              <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                No hay unidades publicadas para esta materia.
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {unidades.map(({ unidad, contenidos }) => (
+                <div key={unidad.unidad_id} className="bg-green-50 rounded-lg p-5 space-y-3">
+                  <p className="text-sm font-bold text-green-800 border-b border-green-200 pb-2">
+                    {unidad.nombre}
+                  </p>
+                  {contenidos.map((contenido) => (
+                    <div key={contenido.contenido_id} className="flex items-start justify-between gap-3 py-1">
+                      <span className="text-sm text-gray-700 leading-snug">
+                        {contenido.titulo}
+                      </span>
+                      <button
+                        onClick={() => setLeccionActiva(contenido)}
+                        className="text-green-700 hover:text-green-900 shrink-0"
+                      >
+                        <i data-lucide="arrow-big-right" className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </>
+      </div>
 
-      {/* Modal para contraseña (simulado) */}
-      {
-        showPasswordModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-xl max-w-sm w-full">
-              <h3 className="text-lg font-bold mb-4">Evaluaciones de Reposición</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Ingrese la contraseña proporcionada por el profesor:
-              </p>
-              <input
-                type="password"
-                className="w-full p-2 border rounded mb-4"
-                placeholder="Contraseña"
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => setShowPasswordModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={() => {
-                    downloadFile(documents.reposicion);
-                    setShowPasswordModal(false);
-                  }}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                  Descargar
-                </button>
-              </div>
+      {/* Modal para contraseña de Reposición (simulado) */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl max-w-sm w-full">
+            <h3 className="text-lg font-bold mb-4">Evaluaciones de Reposición</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Ingrese la contraseña proporcionada por el profesor:
+            </p>
+            <input
+              type="password"
+              className="w-full p-2 border rounded mb-4"
+              placeholder="Contraseña"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowPasswordModal(false)}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  downloadFile(documents.reposicion);
+                  setShowPasswordModal(false);
+                }}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                Descargar
+              </button>
             </div>
           </div>
+        </div>
+      )}
 
-        )
-      }
-    </div >
+      {/* ================= MODAL EXPLICATIVO: Mundo Pirata ================= */}
+      {showPirateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-gray-100 flex flex-col">
+            {/* Header del Modal */}
+            <div className="bg-amber-600 px-6 py-4 flex justify-between items-center text-white shrink-0">
+              <h3 className="text-lg font-bold flex items-center gap-2">
+                <i data-lucide="compass" className="w-5 h-5"></i>
+                Mundo Pirata: Autómatas
+              </h3>
+              <button 
+                onClick={() => setShowPirateModal(false)}
+                className="text-white hover:text-amber-200 transition-colors"
+              >
+                <i data-lucide="x" className="w-5 h-5"></i>
+              </button>
+            </div>
 
+            {/* Contenido del Modal */}
+            <div className="p-6 space-y-4 flex-1">
+              <p className="text-sm text-gray-600 leading-relaxed">
+                ¡Te damos la bienvenida al <strong>Mundo Pirata</strong>! Este recurso interactivo gamificado en Genially está desarrollado para apoyarte a comprender y dominar las transiciones de estados de los <strong>Autómatas Finitos</strong> de forma totalmente lúdica.
+              </p>
+              
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
+                <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1">
+                  <i data-lucide="help-circle" className="w-3.5 h-3.5"></i> ¿Qué incluye esta actividad?
+                </h4>
+                <ul className="text-xs text-gray-700 space-y-1.5 pl-4 list-disc">
+                  <li>Desafíos interactivos sobre reconocimiento de lenguajes regulares.</li>
+                  <li>Validación visual y de caminos lúdicos de cadenas de caracteres.</li>
+                  <li>Un excelente ejercicio práctico interactivo ideal para repasar antes del examen.</li>
+                </ul>
+              </div>
+              
+              <p className="text-[11px] text-gray-400 italic">
+                Nota: El juego interactivo se abrirá de manera externa en una pestaña nueva de Genially.
+              </p>
+            </div>
+
+            {/* Footer del Modal */}
+            <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t border-gray-100 shrink-0">
+              <button
+                onClick={() => setShowPirateModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                Regresar
+              </button>
+              <a
+                href="https://view.genially.com/60ec72a88d97400d66b8ccf2"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setShowPirateModal(false)}
+                className="px-5 py-2 text-sm font-medium bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors flex items-center gap-2 shadow-sm shadow-amber-200"
+              >
+                <i data-lucide="external-link" className="w-4 h-4"></i>
+                ¡Zarpar a Jugar!
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

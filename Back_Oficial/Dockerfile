@@ -22,7 +22,7 @@ COPY --from=build /app/prisma ./prisma
 # Copiamos la carpeta de datos para el seed
 COPY --from=build /app/src/data ./src/data
 
-# Corremos la migración (opcional pero recomendado)
+# Corremos la migración y generación de Prisma
 RUN npx prisma generate
 
 EXPOSE 3001

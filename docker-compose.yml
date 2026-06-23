@@ -20,6 +20,8 @@ services:
     build:
       context: ./Back_Oficial
       dockerfile: Dockerfile
+    env_file:
+      - ./Back_Oficial/.env
     container_name: project_backend
     restart: always
     ports:
