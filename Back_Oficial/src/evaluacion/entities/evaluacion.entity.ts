@@ -29,6 +29,12 @@ export class Entrega {
 
   @Field({ nullable: true })
   archivoBase64?: string;
+
+  @Field({ defaultValue: 'ENTREGADO' })
+  estado: string;
+
+  @Field(() => Boolean, { defaultValue: false })
+  respuestasDesbloqueadas: boolean;
 }
 
 @ObjectType()

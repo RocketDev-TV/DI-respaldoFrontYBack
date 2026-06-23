@@ -124,4 +124,20 @@ export class EvaluacionService {
       throw new Error('No se pudo devolver la asignación en la base de datos.');
     }
   }
+
+  async desbloquearRespuestas(alumnoId: number, asignacionId: number, desbloqueadas: boolean) {
+  const todasLasEntregas = await this.prisma.entrega.findMany() as any[];
+  const entrega = todasLasEntregas.find(
+    (e) => Number(e.alumnoId) === Number(alumnoId) && Number(e.asignacionId) === Number(asignacionId)
+  );
+  
+  if (!entrega) throw new Error('Entrega no encontrada');
+
+  return await this.prisma.entrega.upsert({
+    data: {
+      ...entrega,
+      respuestasDesbloqueadas: desbloqueadas
+    }
+  });
+}
 }

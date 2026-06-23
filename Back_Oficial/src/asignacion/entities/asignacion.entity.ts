@@ -38,4 +38,10 @@ export class Asignacion {
 
   @Field(() => [Video], { nullable: true })
   videos?: Video[];
+
+  @Field({ defaultValue: 'ENTREGADO' })
+  estado: string;
+
+  @Field(() => Boolean, { defaultValue: false })
+  respuestasDesbloqueadas: boolean;
 }

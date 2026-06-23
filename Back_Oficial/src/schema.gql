@@ -19,11 +19,13 @@ type Asignacion {
   contenidoId: Int
   descripcion: String!
   entregable: Boolean!
+  estado: String!
   grupo: String!
   id: ID!
   orden: Int!
   periodo: Int!
   porcentaje: Int!
+  respuestasDesbloqueadas: Boolean!
   rubrica: String!
   titulo: String!
   videos: [Video!]
@@ -77,10 +79,13 @@ input CreateAlumnoInput {
 
 input CreateAsignacionInput {
   activa: Boolean! = true
+  archivoRespuestas: String
   contenidoId: Int
   descripcion: String! = ""
   entregable: Boolean! = true
   grupo: String! = ""
+  mimeTypeRespuestas: String
+  nombreArchivoRespuestas: String
   orden: Int! = 0
   periodo: Int!
   porcentaje: Int! = 0
@@ -135,9 +140,11 @@ type Entrega {
   asignacionId: Int!
   calificacion: Float
   entregadoEn: DateTime
+  estado: String!
   id: Int!
   mimeType: String
   nombreArchivo: String
+  respuestasDesbloqueadas: Boolean!
   tamano: Int
 }
 
@@ -182,6 +189,7 @@ type Mutation {
   crearUnidad(createUnidadInput: CreateUnidadInput!): Unidad!
   crearUsuario(datos: CreateUsuarioInput!): Alumno!
   crearVideo(datos: CreateVideoInput!): Video!
+  desbloquearRespuestas(alumnoId: Int!, asignacionId: Int!, desbloqueadas: Boolean!): Entrega!
   devolverEntrega(alumnoId: Int!, asignacionId: Int!): Boolean!
   eliminarAsignacion(id: Int!): Asignacion!
   eliminarContenido(id: Int!): Contenido!
@@ -277,11 +285,14 @@ type Unidad {
 
 input UpdateAsignacionInput {
   activa: Boolean
+  archivoRespuestas: String
   contenidoId: Int
   descripcion: String
   entregable: Boolean
   grupo: String
   id: Int!
+  mimeTypeRespuestas: String
+  nombreArchivoRespuestas: String
   orden: Int
   periodo: Int
   porcentaje: Int

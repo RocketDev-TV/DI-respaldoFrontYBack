@@ -26,6 +26,15 @@ export class UpdateAsignacionInput {
   @Field({ nullable: true })
   rubrica?: string;
 
+  @Field({ nullable: true })
+  archivoRespuestas?: string;
+
+  @Field({ nullable: true })
+  nombreArchivoRespuestas?: string;
+
+  @Field({ nullable: true })
+  mimeTypeRespuestas?: string;
+
   @Field(() => Int, { nullable: true })
   orden?: number;
 

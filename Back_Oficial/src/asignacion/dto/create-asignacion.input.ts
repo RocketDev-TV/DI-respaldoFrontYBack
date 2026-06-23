@@ -29,6 +29,15 @@ export class CreateAsignacionInput {
   @Field({ defaultValue: true })
   activa: boolean;
 
+  @Field({ nullable: true })
+  archivoRespuestas?: string;
+
+  @Field({ nullable: true })
+  nombreArchivoRespuestas?: string;
+
+  @Field({ nullable: true })
+  mimeTypeRespuestas?: string;
+
   @Field(() => Int, { nullable: true })
   contenidoId?: number;
 

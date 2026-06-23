@@ -107,6 +107,9 @@ model Asignacion {
   orden       Int       @default(0)
   activa      Boolean   @default(true)
   contenidoId Int?
+  archivoRespuestas       String?
+  nombreArchivoRespuestas String?
+  mimeTypeRespuestas      String?
   contenido   Contenido? @relation(fields: [contenidoId], references: [id])
   videos      Video[]
   entregas    Entrega[]
@@ -161,4 +164,6 @@ model Entrega {
   mimeType      String?
   tamano        Int?
   archivoBase64 String?
+  estado                  String   @default("ENTREGADO") // Puede ser "ENTREGADO", "DEVUELTO", "CALIFICADO"
+  respuestasDesbloqueadas Boolean  @default(false)
 }
