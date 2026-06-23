@@ -126,18 +126,19 @@ export class EvaluacionService {
   }
 
   async desbloquearRespuestas(alumnoId: number, asignacionId: number, desbloqueadas: boolean) {
-  const todasLasEntregas = await this.prisma.entrega.findMany() as any[];
-  const entrega = todasLasEntregas.find(
-    (e) => Number(e.alumnoId) === Number(alumnoId) && Number(e.asignacionId) === Number(asignacionId)
-  );
-  
-  if (!entrega) throw new Error('Entrega no encontrada');
+    const todasLasEntregas = await this.prisma.entrega.findMany() as any[];
+    const entrega = todasLasEntregas.find(
+      (e) => Number(e.alumnoId) === Number(alumnoId) && Number(e.asignacionId) === Number(asignacionId)
+    );
+    
+    if (!entrega) throw new Error('Entrega no encontrada');
 
-  return await this.prisma.entrega.upsert({
-    data: {
-      ...entrega,
-      respuestasDesbloqueadas: desbloqueadas
-    }
-  });
-}
+    // Mandamos estrictamente el ID y el campo a cambiar, NADA MAS.
+    return await this.prisma.entrega.upsert({
+      data: {
+        id: entrega.id,
+        respuestasDesbloqueadas: desbloqueadas
+      }
+    });
+  }
 }

@@ -87,6 +87,9 @@ function mapAsignacion(asignacion) {
     activa: asignacion.activa,
     contenidoId: asignacion.contenidoId,
     videos: (asignacion.videos || []).map(mapVideo),
+    archivoRespuestas: asignacion.archivoRespuestas,
+    nombreArchivoRespuestas: asignacion.nombreArchivoRespuestas,
+    mimeTypeRespuestas: asignacion.mimeTypeRespuestas,
   };
 }
 
@@ -202,6 +205,9 @@ export async function fetchUnidadesPorMateria(tipoMateria) {
               orden
               activa
               contenidoId
+              archivoRespuestas
+              nombreArchivoRespuestas
+              mimeTypeRespuestas
               videos {
                 id
                 titulo
@@ -268,6 +274,9 @@ export async function fetchContenidosPorMateria(tipoMateria) {
             orden
             activa
             contenidoId
+            archivoRespuestas
+            nombreArchivoRespuestas
+            mimeTypeRespuestas
             videos {
               id
               titulo
@@ -304,6 +313,9 @@ export async function fetchAsignaciones({ periodo, contenidoId, grupo } = {}) {
           orden
           activa
           contenidoId
+          archivoRespuestas
+          nombreArchivoRespuestas
+          mimeTypeRespuestas
           videos {
             id
             titulo

@@ -480,6 +480,9 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
       unidadId: contenido?.unidad_id || '',
       contenidoId: asignacion.contenidoId,
       videoIds: (asignacion.videos || []).map((item) => item.id),
+      archivoRespuestas: asignacion.archivoRespuestas || '',
+      nombreArchivoRespuestas: asignacion.nombreArchivoRespuestas || '',
+      mimeTypeRespuestas: asignacion.mimeTypeRespuestas || '',
     });
   };
 
@@ -867,17 +870,8 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
             placeholder="Rúbrica"
             className="w-full rounded-lg border border-gray-300 px-4 py-2"
           />
-
-          <input
-            value={assignmentDraft.rubrica}
-            onChange={(event) =>
-              setAssignmentDraft({ ...assignmentDraft, rubrica: event.target.value })
-            }
-            placeholder="Rúbrica"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2"
-          />
           
-          {/* Subida de archivo real para respuestas */}
+          {/* NUEVO: Subida de archivo real para respuestas */}
           <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
             <h4 className="text-sm font-bold text-amber-800 flex items-center gap-2 mb-2">
               <i data-lucide="unlock" className="w-4 h-4"></i>
@@ -887,17 +881,17 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
               Sube el archivo (PDF, Word, etc.) con las respuestas. Podrás liberarlo a los alumnos desde el panel de calificaciones.
             </p>
             {assignmentDraft.nombreArchivoRespuestas ? (
-              <div className="flex items-center justify-between bg-white border border-amber-300 p-2 rounded-lg">
-                <span className="text-sm text-gray-700 truncate pr-4">
-                  <i data-lucide="file" className="w-4 h-4 inline mr-2 text-amber-600"></i>
+              <div className="flex items-center justify-between bg-white border border-amber-300 p-2.5 rounded-lg shadow-sm">
+                <span className="text-sm text-gray-700 truncate pr-4 font-medium flex items-center">
+                  <i data-lucide="file-check" className="w-4 h-4 mr-2 text-amber-600"></i>
                   {assignmentDraft.nombreArchivoRespuestas}
                 </span>
                 <button 
                   type="button" 
                   onClick={() => setAssignmentDraft({ ...assignmentDraft, archivoRespuestas: '', nombreArchivoRespuestas: '', mimeTypeRespuestas: '' })}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1.5 rounded-md transition-colors flex items-center gap-1 text-xs font-bold"
                 >
-                  <i data-lucide="x-circle" className="w-5 h-5"></i>
+                  <i data-lucide="x" className="w-3.5 h-3.5"></i> Quitar
                 </button>
               </div>
             ) : (
