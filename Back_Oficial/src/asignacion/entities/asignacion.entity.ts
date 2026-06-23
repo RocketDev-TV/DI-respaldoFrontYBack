@@ -44,4 +44,13 @@ export class Asignacion {
 
   @Field(() => Boolean, { defaultValue: false })
   respuestasDesbloqueadas: boolean;
+
+  @Field({ nullable: true })
+  archivoRespuestas?: string;
+
+  @Field({ nullable: true })
+  nombreArchivoRespuestas?: string;
+
+  @Field({ nullable: true })
+  mimeTypeRespuestas?: string;
 }
