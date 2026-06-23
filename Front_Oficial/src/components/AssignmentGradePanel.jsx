@@ -7,6 +7,7 @@ import {
   fetchEntregas,
   fetchArchivoEntrega,
   devolverEntrega,
+  desbloquearRespuestas
 } from '../services/evaluacionApi';
 
 const AssignmentGradePanel = () => {
@@ -240,6 +241,22 @@ const AssignmentGradePanel = () => {
     }
   };
 
+  const handleToggleUnlock = async (entrega) => {
+    const nuevoEstado = !entrega.respuestasDesbloqueadas;
+    try {
+      await desbloquearRespuestas(entrega.alumnoId, entrega.asignacionId, nuevoEstado);
+      setEntregasRegistradas((actuales) =>
+        actuales.map(item =>
+          (Number(item.alumnoId) === Number(entrega.alumnoId) && Number(item.asignacionId) === Number(entrega.asignacionId))
+            ? { ...item, respuestasDesbloqueadas: nuevoEstado }
+            : item
+        )
+      );
+    } catch (error) {
+      alert('Error al cambiar el estado de las respuestas.');
+    }
+  };
+
   return (
     <div className="space-y-6 relative">
       <div className="rounded-2xl border border-gray-200 bg-white p-4 md:p-6 shadow-sm">
@@ -373,6 +390,18 @@ const AssignmentGradePanel = () => {
                                 <button key="btn-devolver" onClick={() => handleDevolverEntrega(entrega)} title="Devolver" className="p-2 rounded-md bg-white border border-red-200 text-red-600 shadow-sm hover:bg-red-50 transition-colors">                                  
                                   <i data-lucide="rotate-ccw" className="w-4 h-4"></i>
                                 </button>
+                                {/* Botón de Candado */}
+                                <button 
+                                  onClick={() => handleToggleUnlock(entrega)} 
+                                  title={entrega.respuestasDesbloqueadas ? "Ocultar respuestas" : "Liberar respuestas"} 
+                                  className={`p-1.5 rounded-md border shadow-sm transition-colors ${
+                                    entrega.respuestasDesbloqueadas 
+                                    ? 'bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200' 
+                                    : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50'
+                                  }`}
+                                >
+                                  <i data-lucide={entrega.respuestasDesbloqueadas ? "unlock" : "lock"} className="w-3.5 h-3.5"></i>
+                                </button>
                               </>
                             )}
                           </div>
@@ -473,6 +502,19 @@ const AssignmentGradePanel = () => {
                                       </button>
                                       <button onClick={() => handleDevolverEntrega(entrega)} title="Devolver asignación" className="p-1.5 rounded-md bg-white border border-red-200 text-red-600 shadow-sm hover:bg-red-50 transition-colors">
                                         <i data-lucide="rotate-ccw" className="w-3.5 h-3.5"></i>
+                                      </button>
+
+                                      {/* Botón de Candado */}
+                                      <button 
+                                        onClick={() => handleToggleUnlock(entrega)} 
+                                        title={entrega.respuestasDesbloqueadas ? "Ocultar respuestas" : "Liberar respuestas"} 
+                                        className={`p-1.5 rounded-md border shadow-sm transition-colors ${
+                                          entrega.respuestasDesbloqueadas 
+                                          ? 'bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200' 
+                                          : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50'
+                                        }`}
+                                      >
+                                        <i data-lucide={entrega.respuestasDesbloqueadas ? "unlock" : "lock"} className="w-3.5 h-3.5"></i>
                                       </button>
                                     </div>
                                   </>

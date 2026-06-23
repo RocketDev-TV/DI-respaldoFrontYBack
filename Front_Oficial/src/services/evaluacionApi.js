@@ -214,10 +214,31 @@ export async function fetchEntregas(filtros = {}) {
           mimeType
           tamano
           entregadoEn
+          estado
+          respuestasDesbloqueadas
         }
       }
     `,
     variables
   );
   return data.entregas || [];
+}
+
+export async function desbloquearRespuestas(alumnoId, asignacionId, desbloqueadas) {
+  const data = await graphqlRequest(
+    `
+      mutation DesbloquearRespuestas($alumnoId: Int!, $asignacionId: Int!, $desbloqueadas: Boolean!) {
+        desbloquearRespuestas(alumnoId: $alumnoId, asignacionId: $asignacionId, desbloqueadas: $desbloqueadas) {
+          id
+          respuestasDesbloqueadas
+        }
+      }
+    `,
+    {
+      alumnoId: Number(alumnoId),
+      asignacionId: Number(asignacionId),
+      desbloqueadas: Boolean(desbloqueadas)
+    }
+  );
+  return data.desbloquearRespuestas;
 }

@@ -17,6 +17,7 @@ function buildChecklist(parcial, asignaciones) {
       descripcion: asignacion.descripcion,
       rubrica: asignacion.rubrica,
       videos: asignacion.videos || [],
+      archivoRespuestas: asignacion.archivoRespuestas,
     })),
   };
 }

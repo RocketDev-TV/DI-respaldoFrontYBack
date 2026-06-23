@@ -58,6 +58,9 @@ const INITIAL_ASSIGNMENT = {
   unidadId: '',
   contenidoId: '',
   videoIds: [],
+  archivoRespuestas: '',
+  nombreArchivoRespuestas: '',
+  mimeTypeRespuestas: '',
 };
 
 function MultiToggle({ options, value, onChange }) {
@@ -380,9 +383,31 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
     }
   };
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('El archivo de respuestas no debe superar los 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (upload) => {
+      const base64Raw = upload.target.result.split(',')[1];
+      setAssignmentDraft({
+        ...assignmentDraft,
+        archivoRespuestas: base64Raw,
+        nombreArchivoRespuestas: file.name,
+        mimeTypeRespuestas: file.type,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleAssignmentSubmit = async (event) => {
     event.preventDefault();
-    resetMessages();    
+    resetMessages();
     
     const { id, unidadId, videoIds, ...datosLimpios } = assignmentDraft;
     
@@ -842,6 +867,48 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
             placeholder="Rúbrica"
             className="w-full rounded-lg border border-gray-300 px-4 py-2"
           />
+
+          <input
+            value={assignmentDraft.rubrica}
+            onChange={(event) =>
+              setAssignmentDraft({ ...assignmentDraft, rubrica: event.target.value })
+            }
+            placeholder="Rúbrica"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2"
+          />
+          
+          {/* Subida de archivo real para respuestas */}
+          <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
+            <h4 className="text-sm font-bold text-amber-800 flex items-center gap-2 mb-2">
+              <i data-lucide="unlock" className="w-4 h-4"></i>
+              Banco de Respuestas (Opcional)
+            </h4>
+            <p className="text-xs text-amber-700 mb-3">
+              Sube el archivo (PDF, Word, etc.) con las respuestas. Podrás liberarlo a los alumnos desde el panel de calificaciones.
+            </p>
+            {assignmentDraft.nombreArchivoRespuestas ? (
+              <div className="flex items-center justify-between bg-white border border-amber-300 p-2 rounded-lg">
+                <span className="text-sm text-gray-700 truncate pr-4">
+                  <i data-lucide="file" className="w-4 h-4 inline mr-2 text-amber-600"></i>
+                  {assignmentDraft.nombreArchivoRespuestas}
+                </span>
+                <button 
+                  type="button" 
+                  onClick={() => setAssignmentDraft({ ...assignmentDraft, archivoRespuestas: '', nombreArchivoRespuestas: '', mimeTypeRespuestas: '' })}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <i data-lucide="x-circle" className="w-5 h-5"></i>
+                </button>
+              </div>
+            ) : (
+              <input
+                type="file"
+                onChange={handleFileUpload}
+                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200 cursor-pointer transition-colors"
+              />
+            )}
+          </div>
+
           <div>
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-gray-400">
               Vincular videos
