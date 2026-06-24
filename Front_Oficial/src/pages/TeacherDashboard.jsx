@@ -1,9 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { cerrarSesion } from '../utils/localStorage';
 import ContentManagementPanel from '../components/ContentManagementPanel';
 import ResourceManagerPanel from '../components/ResourceManagerPanel';
+import QuizAdminPanel from '../components/QuizAdminPanel';
 
 const TeacherDashboard = ({ usuario, onNavigate, onLogout }) => {
+  const [tabActiva, setTabActiva] = useState('panel');
+
   const handleCerrarSesion = () => {
     cerrarSesion();
     if (onLogout) onLogout();
@@ -50,10 +53,34 @@ const TeacherDashboard = ({ usuario, onNavigate, onLogout }) => {
         </div>
       </div>
 
-      <ContentManagementPanel roleLabel="Moderación" />
-      <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
-        <ResourceManagerPanel />
+      {/* Pestañas de navegación del panel */}
+      <div className="flex gap-2 border-b border-gray-200 overflow-x-auto pb-1">
+        {[
+          { id: 'panel', label: 'Contenido' },
+          { id: 'recursos', label: 'Recursos' },
+          { id: 'cuestionarios', label: 'Cuestionarios' },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setTabActiva(tab.id)}
+            className={`px-5 py-2.5 font-semibold text-sm transition-all border-b-4 whitespace-nowrap ${
+              tabActiva === tab.id
+                ? 'border-[#6b2132] text-[#6b2132]'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
+
+      {tabActiva === 'panel' && <ContentManagementPanel roleLabel="Moderación" />}
+      {tabActiva === 'recursos' && (
+        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+          <ResourceManagerPanel />
+        </div>
+      )}
+      {tabActiva === 'cuestionarios' && <QuizAdminPanel />}
     </div>
   );
 };

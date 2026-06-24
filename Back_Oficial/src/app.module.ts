@@ -14,6 +14,7 @@ import { VideoModule } from './video/video.module';
 import { EvaluacionModule } from './evaluacion/evaluacion.module';
 import { AuthModule } from './auth/auth.module';
 import { RecursoModule } from './recurso/recurso.module';
+import { CuestionarioModule } from './cuestionario/cuestionario.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { loadLocalEnvFiles } from './load-env';
@@ -64,6 +65,7 @@ loadLocalEnvFiles();
     AuthModule,
     EvaluacionModule,
     RecursoModule,
+    CuestionarioModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile:

@@ -57,8 +57,9 @@ model Alumno {
   password String  @default("")
   rol      String  @default("ALUMNO")
   estado   String  @default("ACTIVO")
-  verificationCodes VerificationCode[]
-  entregas          Entrega[]
+  verificationCodes      VerificationCode[]
+  entregas               Entrega[]
+  evaluacionesCuestionario EvaluacionCuestionario[]
 }
 
 model Unidad {
@@ -150,6 +151,49 @@ model VerificationCode {
   alumno    Alumno   @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
 
   @@index([alumnoId])
+}
+
+enum TipoPregunta {
+  MULTIPLE
+  ABIERTA
+}
+
+model Cuestionario {
+  id          Int                      @id @default(autoincrement())
+  titulo      String
+  descripcion String                   @default("")
+  activo      Boolean                  @default(true)
+  creadoEn    DateTime                 @default(now())
+  preguntas   Pregunta[]
+  evaluaciones EvaluacionCuestionario[]
+}
+
+model Pregunta {
+  id             Int               @id @default(autoincrement())
+  texto          String
+  tipo           TipoPregunta      @default(MULTIPLE)
+  puntos         Float             @default(1)
+  cuestionarioId Int
+  cuestionario   Cuestionario      @relation(fields: [cuestionarioId], references: [id], onDelete: Cascade)
+  opciones       OpcionRespuesta[]
+}
+
+model OpcionRespuesta {
+  id         Int      @id @default(autoincrement())
+  texto      String
+  esCorrecta Boolean  @default(false)
+  preguntaId Int
+  pregunta   Pregunta @relation(fields: [preguntaId], references: [id], onDelete: Cascade)
+}
+
+model EvaluacionCuestionario {
+  id                Int          @id @default(autoincrement())
+  alumnoId          Int
+  alumno            Alumno       @relation(fields: [alumnoId], references: [id])
+  cuestionarioId    Int
+  cuestionario      Cuestionario @relation(fields: [cuestionarioId], references: [id])
+  calificacionFinal Float
+  completadoEn      DateTime     @default(now())
 }
 
 model Entrega {

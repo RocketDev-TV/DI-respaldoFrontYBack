@@ -116,6 +116,39 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
       ),
   };
 
+  readonly cuestionario = {
+    findMany: async (args?: QueryArgs) => this.findCuestionarios(args?.where),
+    findUnique: async ({ where }: QueryArgs) => this.findCuestionarioById(Number(where?.id)),
+    create: async ({ data }: QueryArgs) => this.createCuestionarioCompleto(data),
+    update: async ({ where, data }: QueryArgs) => this.updateCuestionarioInfo(Number(where?.id), data),
+    delete: async ({ where }: QueryArgs) => this.deleteCuestionario(Number(where?.id)),
+  };
+
+  readonly pregunta = {
+    create: async ({ data }: QueryArgs) => this.createPregunta(data),
+    update: async ({ where, data }: QueryArgs) => this.updatePregunta(Number(where?.id), data),
+    delete: async ({ where }: QueryArgs) => this.deletePregunta(Number(where?.id)),
+  };
+
+  readonly opcionRespuesta = {
+    create: async ({ data }: QueryArgs) => this.createOpcion(data),
+    update: async ({ where, data }: QueryArgs) => this.updateOpcion(Number(where?.id), data),
+    delete: async ({ where }: QueryArgs) => this.deleteOpcion(Number(where?.id)),
+  };
+
+  readonly evaluacionCuestionario = {
+    findMany: async (args?: QueryArgs) => this.findEvaluacionesCuestionario(args?.where),
+    findWithAlumno: async ({ where }: QueryArgs) => this.findEvaluacionesConAlumno(Number(where?.cuestionarioId)),
+    create: async ({ data }: QueryArgs) => this.createEvaluacionCuestionario(data),
+    update: async ({ where, data }: QueryArgs) => this.updateEvaluacion(Number(where?.id), data),
+  };
+
+  readonly respuestaAbierta = {
+    findMany: async (args?: QueryArgs) => this.findRespuestasAbiertas(args?.where),
+    create: async ({ data }: QueryArgs) => this.createRespuestaAbierta(data),
+    update: async ({ where, data }: QueryArgs) => this.updateRespuestaAbierta(Number(where?.id), data),
+  };
+
   readonly verificationCode = {
     create: async ({ data }: QueryArgs) => {
       return this.queryOne(
@@ -931,6 +964,334 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return true;
   }
 
+  private async updateCuestionarioInfo(id: number, data?: any) {
+    await this.updateRow(
+      '"Cuestionario"',
+      id,
+      {
+        titulo: data?.titulo,
+        descripcion: data?.descripcion,
+        activo: data?.activo,
+      },
+      'RETURNING id',
+    );
+    return this.findCuestionarioById(id);
+  }
+
+  private async createPregunta(data?: any) {
+    const pregunta = await this.queryOne(
+      `INSERT INTO "Pregunta" (texto, tipo, puntos, "cuestionarioId")
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, texto, tipo, puntos, "cuestionarioId"`,
+      [data?.texto, data?.tipo ?? 'MULTIPLE', data?.puntos ?? 1, data?.cuestionarioId],
+    );
+    const opciones = await this.queryRows(
+      'SELECT id, texto, "esCorrecta", "preguntaId" FROM "OpcionRespuesta" WHERE "preguntaId" = $1',
+      [pregunta.id],
+    );
+    return { ...pregunta, opciones };
+  }
+
+  private async updatePregunta(id: number, data?: any) {
+    await this.updateRow(
+      '"Pregunta"',
+      id,
+      { texto: data?.texto, tipo: data?.tipo, puntos: data?.puntos },
+      'RETURNING id',
+    );
+    const pregunta = await this.queryOne(
+      'SELECT id, texto, tipo, puntos, "cuestionarioId" FROM "Pregunta" WHERE id = $1',
+      [id],
+    );
+    const opciones = await this.queryRows(
+      'SELECT id, texto, "esCorrecta", "preguntaId" FROM "OpcionRespuesta" WHERE "preguntaId" = $1 ORDER BY id',
+      [id],
+    );
+    return { ...pregunta, opciones };
+  }
+
+  private async deletePregunta(id: number): Promise<boolean> {
+    await this.queryOne('DELETE FROM "Pregunta" WHERE id = $1', [id]);
+    return true;
+  }
+
+  private async createOpcion(data?: any) {
+    if (data?.esCorrecta) {
+      await this.queryRows(
+        'UPDATE "OpcionRespuesta" SET "esCorrecta" = FALSE WHERE "preguntaId" = $1',
+        [data.preguntaId],
+      );
+    }
+    return this.queryOne(
+      `INSERT INTO "OpcionRespuesta" (texto, "esCorrecta", "preguntaId")
+       VALUES ($1, $2, $3)
+       RETURNING id, texto, "esCorrecta", "preguntaId"`,
+      [data?.texto, data?.esCorrecta ?? false, data?.preguntaId],
+    );
+  }
+
+  private async updateOpcion(id: number, data?: any) {
+    if (data?.esCorrecta) {
+      const opcion = await this.queryOne(
+        'SELECT "preguntaId" FROM "OpcionRespuesta" WHERE id = $1',
+        [id],
+      );
+      if (opcion) {
+        await this.queryRows(
+          'UPDATE "OpcionRespuesta" SET "esCorrecta" = FALSE WHERE "preguntaId" = $1',
+          [opcion.preguntaId],
+        );
+      }
+    }
+    return this.updateRow(
+      '"OpcionRespuesta"',
+      id,
+      { texto: data?.texto, '"esCorrecta"': data?.esCorrecta },
+      'RETURNING id, texto, "esCorrecta", "preguntaId"',
+    );
+  }
+
+  private async deleteOpcion(id: number): Promise<boolean> {
+    await this.queryOne('DELETE FROM "OpcionRespuesta" WHERE id = $1', [id]);
+    return true;
+  }
+
+  private async findEvaluacionesConAlumno(cuestionarioId: number) {
+    return this.queryRows(
+      `SELECT e.id, e."alumnoId", e."cuestionarioId", e."calificacionFinal", e."pendienteRevision", e."completadoEn",
+              a.nombre AS "alumnoNombre", a.apellido AS "alumnoApellido", a.email AS "alumnoEmail", a.grupo AS "alumnoGrupo"
+       FROM "EvaluacionCuestionario" e
+       JOIN "Alumno" a ON a.id = e."alumnoId"
+       WHERE e."cuestionarioId" = $1
+       ORDER BY e."completadoEn" DESC`,
+      [cuestionarioId],
+    );
+  }
+
+  private async updateEvaluacion(id: number, data?: any) {
+    return this.updateRow(
+      '"EvaluacionCuestionario"',
+      id,
+      {
+        '"calificacionFinal"': data?.calificacionFinal,
+        '"pendienteRevision"': data?.pendienteRevision,
+      },
+      'RETURNING id, "alumnoId", "cuestionarioId", "calificacionFinal", "pendienteRevision", "completadoEn"',
+    );
+  }
+
+  private async findRespuestasAbiertas(where?: Record<string, unknown>) {
+    const clauses: string[] = [];
+    const params: unknown[] = [];
+
+    if (typeof where?.cuestionarioId === 'number') {
+      params.push(where.cuestionarioId);
+      clauses.push(`ra."cuestionarioId" = $${params.length}`);
+    }
+    if (typeof where?.alumnoId === 'number') {
+      params.push(where.alumnoId);
+      clauses.push(`ra."alumnoId" = $${params.length}`);
+    }
+    if (typeof where?.calificada === 'boolean') {
+      params.push(where.calificada);
+      clauses.push(`ra.calificada = $${params.length}`);
+    }
+
+    const whereClause = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+    return this.queryRows(
+      `SELECT ra.id, ra."alumnoId", ra."cuestionarioId", ra."preguntaId", ra.texto,
+              ra.calificada, ra."esCorrecta", ra."puntosOtorgados", ra."creadoEn",
+              a.nombre AS "alumnoNombre", a.apellido AS "alumnoApellido",
+              p.texto AS "preguntaTexto", p.puntos AS "preguntaPuntos"
+       FROM "RespuestaAbierta" ra
+       JOIN "Alumno" a ON a.id = ra."alumnoId"
+       JOIN "Pregunta" p ON p.id = ra."preguntaId"
+       ${whereClause}
+       ORDER BY ra."creadoEn" DESC`,
+      params,
+    );
+  }
+
+  private async createRespuestaAbierta(data?: any) {
+    return this.queryOne(
+      `INSERT INTO "RespuestaAbierta" ("alumnoId", "cuestionarioId", "preguntaId", texto)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, "alumnoId", "cuestionarioId", "preguntaId", texto, calificada, "esCorrecta", "puntosOtorgados", "creadoEn"`,
+      [data?.alumnoId, data?.cuestionarioId, data?.preguntaId, data?.texto],
+    );
+  }
+
+  private async updateRespuestaAbierta(id: number, data?: any) {
+    // Necesitamos retornar con JOIN (alumnoNombre, preguntaTexto), así que usamos CTE
+    const sets: string[] = [];
+    const params: unknown[] = [id]; // $1 = id
+
+    if (data?.calificada !== undefined) {
+      params.push(data.calificada);
+      sets.push(`calificada = $${params.length}`);
+    }
+    if (data?.esCorrecta !== undefined) {
+      params.push(data.esCorrecta);
+      sets.push(`"esCorrecta" = $${params.length}`);
+    }
+    if (data?.puntosOtorgados !== undefined) {
+      params.push(data.puntosOtorgados);
+      sets.push(`"puntosOtorgados" = $${params.length}`);
+    }
+
+    if (!sets.length) {
+      return this.queryOne(
+        `SELECT ra.id, ra."alumnoId", ra."cuestionarioId", ra."preguntaId", ra.texto,
+                ra.calificada, ra."esCorrecta", ra."puntosOtorgados", ra."creadoEn",
+                a.nombre AS "alumnoNombre", a.apellido AS "alumnoApellido",
+                p.texto AS "preguntaTexto", p.puntos AS "preguntaPuntos"
+         FROM "RespuestaAbierta" ra
+         JOIN "Alumno" a ON a.id = ra."alumnoId"
+         JOIN "Pregunta" p ON p.id = ra."preguntaId"
+         WHERE ra.id = $1`,
+        [id],
+      );
+    }
+
+    return this.queryOne(
+      `WITH updated AS (
+         UPDATE "RespuestaAbierta" SET ${sets.join(', ')} WHERE id = $1 RETURNING *
+       )
+       SELECT u.id, u."alumnoId", u."cuestionarioId", u."preguntaId", u.texto,
+              u.calificada, u."esCorrecta", u."puntosOtorgados", u."creadoEn",
+              a.nombre AS "alumnoNombre", a.apellido AS "alumnoApellido",
+              p.texto AS "preguntaTexto", p.puntos AS "preguntaPuntos"
+       FROM updated u
+       JOIN "Alumno" a ON a.id = u."alumnoId"
+       JOIN "Pregunta" p ON p.id = u."preguntaId"`,
+      params,
+    );
+  }
+
+  private async findCuestionarios(where?: Record<string, unknown>) {
+    const clauses: string[] = [];
+    const params: unknown[] = [];
+
+    if (typeof where?.activo === 'boolean') {
+      params.push(where.activo);
+      clauses.push(`activo = $${params.length}`);
+    }
+
+    const whereClause = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+    const rows = await this.queryRows(
+      `SELECT id, titulo, descripcion, activo, "creadoEn" FROM "Cuestionario" ${whereClause} ORDER BY "creadoEn" DESC`,
+      params,
+    );
+    return this.attachCuestionarioRelations(rows);
+  }
+
+  private async findCuestionarioById(id: number) {
+    const row = await this.queryOne(
+      'SELECT id, titulo, descripcion, activo, "creadoEn" FROM "Cuestionario" WHERE id = $1',
+      [id],
+    );
+    if (!row) return null;
+    const [result] = await this.attachCuestionarioRelations([row]);
+    return result ?? null;
+  }
+
+  private async attachCuestionarioRelations(cuestionarios: any[]) {
+    if (!cuestionarios.length) return [];
+
+    const ids = cuestionarios.map((c) => c.id);
+    const preguntas = await this.queryRows(
+      'SELECT id, texto, tipo, puntos, "cuestionarioId" FROM "Pregunta" WHERE "cuestionarioId" = ANY($1::int[]) ORDER BY id ASC',
+      [ids],
+    );
+
+    const preguntaIds = preguntas.map((p) => p.id);
+    const opciones = preguntaIds.length
+      ? await this.queryRows(
+          'SELECT id, texto, "esCorrecta", "preguntaId" FROM "OpcionRespuesta" WHERE "preguntaId" = ANY($1::int[]) ORDER BY id ASC',
+          [preguntaIds],
+        )
+      : [];
+
+    const preguntasConOpciones = preguntas.map((p) => ({
+      ...p,
+      opciones: opciones.filter((o) => o.preguntaId === p.id),
+    }));
+
+    return cuestionarios.map((c) => ({
+      ...c,
+      preguntas: preguntasConOpciones.filter((p) => p.cuestionarioId === c.id),
+    }));
+  }
+
+  private async createCuestionarioCompleto(data?: any) {
+    const cuestionario = await this.queryOne(
+      `INSERT INTO "Cuestionario" (titulo, descripcion, activo)
+       VALUES ($1, $2, $3)
+       RETURNING id, titulo, descripcion, activo, "creadoEn"`,
+      [data?.titulo, data?.descripcion ?? '', data?.activo ?? true],
+    );
+
+    for (const preguntaData of data?.preguntas ?? []) {
+      const pregunta = await this.queryOne(
+        `INSERT INTO "Pregunta" (texto, tipo, puntos, "cuestionarioId")
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
+        [preguntaData.texto, preguntaData.tipo ?? 'MULTIPLE', preguntaData.puntos ?? 1, cuestionario.id],
+      );
+
+      for (const opcionData of preguntaData.opciones ?? []) {
+        await this.queryOne(
+          `INSERT INTO "OpcionRespuesta" (texto, "esCorrecta", "preguntaId") VALUES ($1, $2, $3)`,
+          [opcionData.texto, opcionData.esCorrecta ?? false, pregunta.id],
+        );
+      }
+    }
+
+    return this.findCuestionarioById(cuestionario.id);
+  }
+
+  private async deleteCuestionario(id: number): Promise<boolean> {
+    // Eliminar dependencias que no tienen CASCADE en producción (por si las FK fueron creadas sin CASCADE)
+    await this.queryRows('DELETE FROM "RespuestaAbierta" WHERE "cuestionarioId" = $1', [id]);
+    await this.queryRows('DELETE FROM "EvaluacionCuestionario" WHERE "cuestionarioId" = $1', [id]);
+    await this.queryOne('DELETE FROM "Cuestionario" WHERE id = $1', [id]);
+    return true;
+  }
+
+  private async findEvaluacionesCuestionario(where?: Record<string, unknown>) {
+    const clauses: string[] = [];
+    const params: unknown[] = [];
+
+    if (typeof where?.alumnoId === 'number') {
+      params.push(where.alumnoId);
+      clauses.push(`"alumnoId" = $${params.length}`);
+    }
+
+    if (typeof where?.cuestionarioId === 'number') {
+      params.push(where.cuestionarioId);
+      clauses.push(`"cuestionarioId" = $${params.length}`);
+    }
+
+    const whereClause = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+    return this.queryRows(
+      `SELECT id, "alumnoId", "cuestionarioId", "calificacionFinal", "pendienteRevision", "completadoEn"
+       FROM "EvaluacionCuestionario"
+       ${whereClause}
+       ORDER BY "completadoEn" DESC`,
+      params,
+    );
+  }
+
+  private async createEvaluacionCuestionario(data?: any) {
+    return this.queryOne(
+      `INSERT INTO "EvaluacionCuestionario" ("alumnoId", "cuestionarioId", "calificacionFinal", "pendienteRevision")
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT ("alumnoId", "cuestionarioId") DO NOTHING
+       RETURNING id, "alumnoId", "cuestionarioId", "calificacionFinal", "pendienteRevision", "completadoEn"`,
+      [data?.alumnoId, data?.cuestionarioId, data?.calificacionFinal ?? 0, data?.pendienteRevision ?? false],
+    );
+  }
+
   private async queryRows(sql: string, params: unknown[] = []) {
     const result = await this.pool.query(sql, params);
     return result.rows;
@@ -1178,6 +1539,70 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     `);
 
     await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS "Cuestionario" (
+        id SERIAL PRIMARY KEY,
+        titulo TEXT NOT NULL,
+        descripcion TEXT NOT NULL DEFAULT '',
+        activo BOOLEAN NOT NULL DEFAULT TRUE,
+        "creadoEn" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS "Pregunta" (
+        id SERIAL PRIMARY KEY,
+        texto TEXT NOT NULL,
+        tipo TEXT NOT NULL DEFAULT 'MULTIPLE',
+        puntos FLOAT NOT NULL DEFAULT 1,
+        "cuestionarioId" INTEGER NOT NULL REFERENCES "Cuestionario"(id) ON DELETE CASCADE
+      )
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS "OpcionRespuesta" (
+        id SERIAL PRIMARY KEY,
+        texto TEXT NOT NULL,
+        "esCorrecta" BOOLEAN NOT NULL DEFAULT FALSE,
+        "preguntaId" INTEGER NOT NULL REFERENCES "Pregunta"(id) ON DELETE CASCADE
+      )
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS "EvaluacionCuestionario" (
+        id SERIAL PRIMARY KEY,
+        "alumnoId" INTEGER NOT NULL REFERENCES "Alumno"(id) ON DELETE CASCADE,
+        "cuestionarioId" INTEGER NOT NULL REFERENCES "Cuestionario"(id) ON DELETE CASCADE,
+        "calificacionFinal" FLOAT NOT NULL,
+        "pendienteRevision" BOOLEAN NOT NULL DEFAULT FALSE,
+        "completadoEn" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await this.pool.query(`
+      ALTER TABLE "EvaluacionCuestionario"
+      ADD COLUMN IF NOT EXISTS "pendienteRevision" BOOLEAN NOT NULL DEFAULT FALSE
+    `).catch(() => {});
+
+    await this.pool.query(`
+      ALTER TABLE "EvaluacionCuestionario"
+      ADD CONSTRAINT "unique_alumno_cuestionario" UNIQUE ("alumnoId", "cuestionarioId")
+    `).catch(() => {});
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS "RespuestaAbierta" (
+        id SERIAL PRIMARY KEY,
+        "alumnoId" INTEGER NOT NULL REFERENCES "Alumno"(id) ON DELETE CASCADE,
+        "cuestionarioId" INTEGER NOT NULL REFERENCES "Cuestionario"(id) ON DELETE CASCADE,
+        "preguntaId" INTEGER NOT NULL REFERENCES "Pregunta"(id) ON DELETE CASCADE,
+        texto TEXT NOT NULL,
+        calificada BOOLEAN NOT NULL DEFAULT FALSE,
+        "esCorrecta" BOOLEAN,
+        "puntosOtorgados" FLOAT,
+        "creadoEn" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await this.pool.query(`
       ALTER TABLE "Entrega" ADD CONSTRAINT "unique_alumno_asignacion" UNIQUE ("alumnoId", "asignacionId");
     `).catch(() => {});
 
@@ -1200,6 +1625,17 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
       
       ALTER TABLE "CalificacionAsignacion" DROP CONSTRAINT IF EXISTS "CalificacionAsignacion_asignacionId_fkey";
       ALTER TABLE "CalificacionAsignacion" ADD CONSTRAINT "CalificacionAsignacion_asignacionId_fkey" FOREIGN KEY ("asignacionId") REFERENCES "Asignacion"("id") ON DELETE CASCADE;
+    `).catch(() => {});
+
+    // Asegurar CASCADE en FK de EvaluacionCuestionario y RespuestaAbierta → Cuestionario
+    await this.pool.query(`
+      ALTER TABLE "EvaluacionCuestionario" DROP CONSTRAINT IF EXISTS "EvaluacionCuestionario_cuestionarioId_fkey";
+      ALTER TABLE "EvaluacionCuestionario" ADD CONSTRAINT "EvaluacionCuestionario_cuestionarioId_fkey"
+        FOREIGN KEY ("cuestionarioId") REFERENCES "Cuestionario"(id) ON DELETE CASCADE;
+
+      ALTER TABLE "RespuestaAbierta" DROP CONSTRAINT IF EXISTS "RespuestaAbierta_cuestionarioId_fkey";
+      ALTER TABLE "RespuestaAbierta" ADD CONSTRAINT "RespuestaAbierta_cuestionarioId_fkey"
+        FOREIGN KEY ("cuestionarioId") REFERENCES "Cuestionario"(id) ON DELETE CASCADE;
     `).catch(() => {});
   }
 

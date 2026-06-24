@@ -1,8 +1,10 @@
 import React from 'react';
 import ChecklistPartial from '../components/ChecklistPartial';
+import QuizPlayer from '../components/QuizPlayer';
 import { cerrarSesion } from '../utils/localStorage';
 import { fetchAsignaciones } from '../services/contenidoApi';
 import { fetchEntregas } from '../services/evaluacionApi';
+import { fetchCuestionarios, fetchEvaluacionesCuestionario } from '../services/cuestionarioApi';
 
 function buildChecklist(parcial, asignaciones) {
   return {
@@ -30,6 +32,9 @@ const StudentDashboard = ({ usuario, onNavigate, onLogout }) => {
   const [error, setError] = React.useState('');
   const [asignaciones, setAsignaciones] = React.useState([]);
   const [entregas, setEntregas] = React.useState([]);
+  const [cuestionarios, setCuestionarios] = React.useState([]);
+  const [misEvaluaciones, setMisEvaluaciones] = React.useState([]);
+  const [cuestionarioActivo, setCuestionarioActivo] = React.useState(null);
 
   const cargarAsignaciones = React.useCallback(async () => {
     setLoading(true);
@@ -58,6 +63,19 @@ const StudentDashboard = ({ usuario, onNavigate, onLogout }) => {
   React.useEffect(() => {
     cargarAsignaciones();
   }, [cargarAsignaciones]);
+
+  React.useEffect(() => {
+    if (!usuario?.id) return;
+    Promise.all([
+      fetchCuestionarios(),
+      fetchEvaluacionesCuestionario({ alumnoId: usuario.id }),
+    ])
+      .then(([quizzes, evals]) => {
+        setCuestionarios(quizzes);
+        setMisEvaluaciones(evals);
+      })
+      .catch(() => {});
+  }, [usuario?.id]);
 
   // Efecto crucial para renderizar los iconos globales (i) cuando cambia la vista responsiva
   React.useEffect(() => {
@@ -156,6 +174,96 @@ const StudentDashboard = ({ usuario, onNavigate, onLogout }) => {
           />
         )}
       </div>
+
+      {/* Sección de Cuestionarios */}
+      {cuestionarios.length > 0 && (
+        <div className="mt-8 bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200">
+          <h2 className="text-xl font-bold text-gray-800 mb-1">Cuestionarios disponibles</h2>
+          <p className="text-sm text-gray-500 mb-5">Contesta los cuestionarios asignados por tu profesor.</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {cuestionarios.map((q) => {
+              const evaluacion = misEvaluaciones.find((e) => e.cuestionarioId === q.id);
+              const aprobado = evaluacion && evaluacion.calificacionFinal >= 60;
+              return (
+                <div
+                  key={q.id}
+                  className={`flex items-center justify-between gap-4 border rounded-xl p-4 transition ${
+                    evaluacion ? 'border-gray-200 bg-gray-50' : 'border-gray-100 hover:border-indigo-200 hover:bg-indigo-50/30'
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-800 text-sm truncate">{q.titulo}</p>
+                    {q.descripcion && (
+                      <p className="text-xs text-gray-500 mt-0.5 truncate">{q.descripcion}</p>
+                    )}
+                    {evaluacion ? (
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className={`text-xs font-bold ${aprobado ? 'text-green-600' : 'text-red-500'}`}>
+                          {evaluacion.calificacionFinal}/100
+                        </span>
+                        {evaluacion.pendienteRevision && (
+                          <span className="text-xs bg-amber-100 text-amber-700 rounded-full px-2 py-0.5">Revisión pendiente</span>
+                        )}
+                        {!evaluacion.pendienteRevision && (
+                          <span className={`text-xs rounded-full px-2 py-0.5 ${aprobado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
+                            {aprobado ? 'Aprobado' : 'Reprobado'}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-indigo-500 mt-1">{q.preguntas?.length ?? 0} pregunta(s)</p>
+                    )}
+                  </div>
+                  {evaluacion ? (
+                    <span className="shrink-0 text-xs text-gray-400 font-medium bg-gray-100 px-3 py-1.5 rounded-lg">
+                      Ya contestado
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => setCuestionarioActivo(q.id)}
+                      className="shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition"
+                    >
+                      Contestar
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Modal QuizPlayer */}
+      {cuestionarioActivo && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 overflow-y-auto"
+          onClick={(e) => e.target === e.currentTarget && setCuestionarioActivo(null)}
+        >
+          <div className="min-h-full flex items-start justify-center py-8 px-4">
+            <div className="bg-gray-50 rounded-2xl w-full max-w-2xl relative shadow-2xl">
+              <button
+                onClick={() => setCuestionarioActivo(null)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
+              >
+                ✕
+              </button>
+              <QuizPlayer
+                cuestionarioId={cuestionarioActivo}
+                alumnoId={usuario?.id}
+                onComplete={() => {
+                  setCuestionarioActivo(null);
+                  // Refrescar evaluaciones para mostrar el nuevo estado
+                  if (usuario?.id) {
+                    fetchEvaluacionesCuestionario({ alumnoId: usuario.id })
+                      .then(setMisEvaluaciones)
+                      .catch(() => {});
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -2,6 +2,37 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input ActualizarCuestionarioInput {
+  activo: Boolean
+  descripcion: String
+  titulo: String
+}
+
+input ActualizarOpcionInput {
+  esCorrecta: Boolean
+  texto: String
+}
+
+input ActualizarPreguntaInput {
+  puntos: Float
+  texto: String
+  tipo: TipoPregunta
+}
+
+input AgregarOpcionInput {
+  esCorrecta: Boolean! = false
+  preguntaId: Int!
+  texto: String!
+}
+
+input AgregarPreguntaInput {
+  cuestionarioId: Int!
+  opciones: [OpcionRespuestaInput!] = []
+  puntos: Float!
+  texto: String!
+  tipo: TipoPregunta!
+}
+
 """Usuario autenticable del sistema"""
 type Alumno {
   apellido: String!
@@ -57,6 +88,12 @@ type CalificacionAsignacion {
   parcial: Int
 }
 
+input CalificarRespuestaAbiertaInput {
+  esCorrecta: Boolean!
+  id: Int!
+  puntosOtorgados: Float!
+}
+
 type Contenido {
   asignaciones: [Asignacion!]
   contenido: [String!]!
@@ -70,6 +107,13 @@ type Contenido {
   unidadId: Int!
   url_recurso: String
   videos: [Video!]
+}
+
+input CrearCuestionarioInput {
+  activo: Boolean = true
+  descripcion: String = ""
+  preguntas: [PreguntaInput!]!
+  titulo: String!
 }
 
 input CrearRecursoInput {
@@ -141,6 +185,15 @@ input CreateVideoInput {
   youtubeUrl: String!
 }
 
+type Cuestionario {
+  activo: Boolean!
+  creadoEn: DateTime
+  descripcion: String!
+  id: Int!
+  preguntas: [Pregunta!]!
+  titulo: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -167,6 +220,28 @@ enum EstadoUsuario {
   INACTIVO
 }
 
+type EvaluacionConAlumno {
+  alumnoApellido: String!
+  alumnoEmail: String!
+  alumnoGrupo: String
+  alumnoId: Int!
+  alumnoNombre: String!
+  calificacionFinal: Float!
+  completadoEn: DateTime
+  cuestionarioId: Int!
+  id: Int!
+  pendienteRevision: Boolean!
+}
+
+type EvaluacionCuestionario {
+  alumnoId: Int!
+  calificacionFinal: Float!
+  completadoEn: DateTime
+  cuestionarioId: Int!
+  id: Int!
+  pendienteRevision: Boolean!
+}
+
 input GuardarCalificacionAsignacionInput {
   alumnoId: Int!
   asignacionId: Int!
@@ -191,13 +266,20 @@ input LoginAlumnoInput {
 type Mutation {
   actualizarAsignacion(datos: UpdateAsignacionInput!): Asignacion!
   actualizarContenido(datos: UpdateContenidoInput!): Contenido!
+  actualizarCuestionario(datos: ActualizarCuestionarioInput!, id: Int!): Cuestionario!
+  actualizarOpcion(datos: ActualizarOpcionInput!, id: Int!): OpcionRespuesta!
+  actualizarPregunta(datos: ActualizarPreguntaInput!, id: Int!): Pregunta!
   actualizarUnidad(updateUnidadInput: UpdateUnidadInput!): Unidad!
   actualizarUsuario(datos: UpdateUsuarioInput!): Alumno!
   actualizarVideo(datos: UpdateVideoInput!): Video!
+  agregarOpcion(datos: AgregarOpcionInput!): OpcionRespuesta!
+  agregarPregunta(datos: AgregarPreguntaInput!): Pregunta!
+  calificarRespuestaAbierta(datos: CalificarRespuestaAbiertaInput!): RespuestaAbierta!
   completarContenido(alumnoId: Int!, contenidoId: Int!): Alumno
   crearAlumno(datos: CreateAlumnoInput!): Alumno!
   crearAsignacion(datos: CreateAsignacionInput!): Asignacion!
   crearContenido(datos: CreateContenidoInput!): Contenido!
+  crearCuestionarioCompleto(datos: CrearCuestionarioInput!): Cuestionario!
   crearRecurso(datos: CrearRecursoInput!): RecursoArchivo!
   crearUnidad(createUnidadInput: CreateUnidadInput!): Unidad!
   crearUsuario(datos: CreateUsuarioInput!): Alumno!
@@ -206,6 +288,9 @@ type Mutation {
   devolverEntrega(alumnoId: Int!, asignacionId: Int!): Boolean!
   eliminarAsignacion(id: Int!): Asignacion!
   eliminarContenido(id: Int!): Contenido!
+  eliminarCuestionario(id: Int!): Boolean!
+  eliminarOpcion(id: Int!): Boolean!
+  eliminarPregunta(id: Int!): Boolean!
   eliminarRecurso(id: Int!): Boolean!
   eliminarUnidad(id: Int!): Unidad!
   eliminarUsuario(id: Int!): Alumno!
@@ -213,6 +298,8 @@ type Mutation {
   guardarCalificacionAsignacion(datos: GuardarCalificacionAsignacionInput!): CalificacionAsignacion!
   iniciarSesion(datos: LoginAlumnoInput!): AuthPayload!
   registrarEntrega(datos: RegistrarEntregaInput!): Entrega!
+  registrarEvaluacionCuestionario(datos: RegistrarEvaluacionInput!): EvaluacionCuestionario
+  registrarRespuestaAbierta(datos: RegistrarRespuestaAbiertaInput!): RespuestaAbierta!
 
   """Valida el código y actualiza la contraseña"""
   restablecerPassword(datos: RestablecerPasswordInput!): Boolean!
@@ -221,19 +308,52 @@ type Mutation {
   solicitarRecuperacionPassword(datos: SolicitarRecuperacionInput!): Boolean!
 }
 
+type OpcionRespuesta {
+  esCorrecta: Boolean!
+  id: Int!
+  preguntaId: Int!
+  texto: String!
+}
+
+input OpcionRespuestaInput {
+  esCorrecta: Boolean!
+  texto: String!
+}
+
+type Pregunta {
+  cuestionarioId: Int!
+  id: Int!
+  opciones: [OpcionRespuesta!]!
+  puntos: Float!
+  texto: String!
+  tipo: TipoPregunta!
+}
+
+input PreguntaInput {
+  opciones: [OpcionRespuestaInput!]!
+  puntos: Float!
+  texto: String!
+  tipo: TipoPregunta!
+}
+
 type Query {
   asignacion(id: Int!): Asignacion
   asignaciones(contenidoId: Int, grupo: String, periodo: Int): [Asignacion!]!
   calificacionesAsignacion(alumnoId: Int, asignacionId: Int, grupo: String, parcial: Int): [CalificacionAsignacion!]!
   contenido(id: Int!): Contenido
   contenidos(tipoMateria: TipoMateria): [Contenido!]!
+  cuestionario(id: Int!): Cuestionario!
+  cuestionarios(todos: Boolean): [Cuestionario!]!
   entregas(alumnoId: Int, asignacionId: Int, grupo: String, parcial: Int): [Entrega!]!
+  evaluacionesConAlumno(cuestionarioId: Int!): [EvaluacionConAlumno!]!
+  evaluacionesCuestionario(alumnoId: Int, cuestionarioId: Int): [EvaluacionCuestionario!]!
   getKpisGrupo(grupo: String!): AsignacionKpis!
   grupos: [String!]!
   insignias: [Insignia!]!
   obtenerRecursos: [RecursoArchivo!]!
   ping: String!
   recurso(id: Int!): RecursoArchivo
+  respuestasAbiertas(alumnoId: Int, calificada: Boolean, cuestionarioId: Int): [RespuestaAbierta!]!
   rubricasPorPeriodo(periodo: Int!): [Rubrica!]!
   unidad(id: Int!): Unidad
   unidades(tipoMateria: TipoMateria): [Unidad!]!
@@ -262,6 +382,36 @@ input RegistrarEntregaInput {
   mimeType: String!
   nombreArchivo: String!
   tamano: Int!
+}
+
+input RegistrarEvaluacionInput {
+  alumnoId: Int!
+  calificacionFinal: Float!
+  cuestionarioId: Int!
+  pendienteRevision: Boolean! = false
+}
+
+input RegistrarRespuestaAbiertaInput {
+  alumnoId: Int!
+  cuestionarioId: Int!
+  preguntaId: Int!
+  texto: String!
+}
+
+type RespuestaAbierta {
+  alumnoApellido: String!
+  alumnoId: Int!
+  alumnoNombre: String!
+  calificada: Boolean!
+  creadoEn: DateTime
+  cuestionarioId: Int!
+  esCorrecta: Boolean
+  id: Int!
+  preguntaId: Int!
+  preguntaPuntos: Float!
+  preguntaTexto: String!
+  puntosOtorgados: Float
+  texto: String!
 }
 
 input RestablecerPasswordInput {
@@ -298,6 +448,11 @@ enum TipoMateria {
   COMPILADORES
   TEORIA_DE_LA_COMPUTACION
   TEORIA_DE_LENGUAJES
+}
+
+enum TipoPregunta {
+  ABIERTA
+  MULTIPLE
 }
 
 enum TipoVideo {

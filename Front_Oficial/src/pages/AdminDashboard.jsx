@@ -12,6 +12,7 @@ import ContentManagementPanel from '../components/ContentManagementPanel';
 import ResourceManagerPanel from '../components/ResourceManagerPanel';
 import AssignmentGradePanel from '../components/AssignmentGradePanel';
 import StudentAnalyticsPanel from '../pages/StudentAnalyticsPanel';
+import QuizAdminPanel from '../components/QuizAdminPanel';
 
 const INITIAL_USER = {
   id: null,
@@ -187,6 +188,7 @@ const AdminDashboard = ({ usuario, onNavigate, onLogout }) => {
           { id: 'usuarios', label: 'Usuarios' },
           { id: 'calificaciones', label: 'Calificaciones' },
           { id: 'contenidos', label: 'Contenidos' },
+          { id: 'cuestionarios', label: 'Cuestionarios' },
           { id: 'analiticas', label: 'Analíticas' },
         ].map((tab) => (
           <button
@@ -477,6 +479,8 @@ const AdminDashboard = ({ usuario, onNavigate, onLogout }) => {
         </div>
       ) : tabActiva === 'calificaciones' ? (
         <AssignmentGradePanel />
+      ) : tabActiva === 'cuestionarios' ? (
+        <QuizAdminPanel />
       ) : tabActiva === 'analiticas' ? (
         <StudentAnalyticsPanel />
       ) : (
