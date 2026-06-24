@@ -37,7 +37,12 @@ async function graphqlRequest(query, variables) {
   });
 
   if (!response.ok) {
-    throw new Error(`Error HTTP ${response.status}`);
+    const detalle = await response
+      .clone()
+      .json()
+      .then((body) => body.errors?.[0]?.message)
+      .catch(() => null);
+    throw new Error(detalle || `Error HTTP ${response.status}`);
   }
 
   const payload = await response.json();
@@ -513,12 +518,41 @@ export async function eliminarVideo(id) {
   return data.eliminarVideo;
 }
 
+// Campos completos que devuelven las mutaciones de asignación, para poder
+// actualizar el estado local de inmediato (incluido el banco de respuestas).
+const ASIGNACION_FIELDS = `
+  id
+  titulo
+  descripcion
+  porcentaje
+  periodo
+  grupo
+  entregable
+  rubrica
+  orden
+  activa
+  contenidoId
+  archivoRespuestas
+  nombreArchivoRespuestas
+  mimeTypeRespuestas
+  videos {
+    id
+    titulo
+    descripcion
+    youtubeUrl
+    youtubeId
+    tipos
+    publicado
+    contenidoId
+  }
+`;
+
 export async function crearAsignacion(payload) {
   const data = await graphqlRequest(
     `
       mutation CrearAsignacion($datos: CreateAsignacionInput!) {
         crearAsignacion(datos: $datos) {
-          id
+          ${ASIGNACION_FIELDS}
         }
       }
     `,
@@ -534,7 +568,7 @@ export async function crearAsignacion(payload) {
     },
   );
 
-  return data.crearAsignacion;
+  return mapAsignacion(data.crearAsignacion);
 }
 
 export async function actualizarAsignacion(payload) {
@@ -542,7 +576,7 @@ export async function actualizarAsignacion(payload) {
     `
       mutation ActualizarAsignacion($datos: UpdateAsignacionInput!) {
         actualizarAsignacion(datos: $datos) {
-          id
+          ${ASIGNACION_FIELDS}
         }
       }
     `,
@@ -560,7 +594,7 @@ export async function actualizarAsignacion(payload) {
     },
   );
 
-  return data.actualizarAsignacion;
+  return mapAsignacion(data.actualizarAsignacion);
 }
 
 export async function eliminarAsignacion(id) {

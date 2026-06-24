@@ -119,13 +119,21 @@ const AssignmentGradePanel = () => {
         Number(item.asignacionId) === Number(asignacionId),
     )?.calificacion ?? '';
 
-  const obtenerEntrega = (estudianteId, asignacionId) => 
+  const obtenerEntrega = (estudianteId, asignacionId) =>
     entregasRegistradas.find(
       (item) =>
         Number(item.alumnoId) === Number(estudianteId) &&
         Number(item.asignacionId) === Number(asignacionId),
     );
 
+  // "Entregada 2 veces · Devuelta 1 vez" (null si nunca se ha entregado ni devuelto).
+  const textoContador = (entrega) => {
+    if (!entrega) return null;
+    const e = entrega.contadorEntregas || 0;
+    const d = entrega.contadorDevoluciones || 0;
+    if (e === 0 && d === 0) return null;
+    return `Entregada ${e} ${e === 1 ? 'vez' : 'veces'} · Devuelta ${d} ${d === 1 ? 'vez' : 'veces'}`;
+  };
   const handleInputChange = (estudianteId, asignacionId, value) => {
     const numericValue = value === '' ? '' : Number(value);
     if (numericValue !== '' && (Number.isNaN(numericValue) || numericValue < 0 || numericValue > 100)) return;
@@ -229,11 +237,10 @@ const AssignmentGradePanel = () => {
     if (window.confirm('¿Estás seguro de devolver esta asignación? El alumno tendrá que subir el archivo de nuevo.')) {
       try {
         await devolverEntrega(entrega.alumnoId, entrega.asignacionId);
-        setEntregasRegistradas((actuales) => 
-          actuales.filter(item => 
-            !(Number(item.alumnoId) === Number(entrega.alumnoId) && Number(item.asignacionId) === Number(entrega.asignacionId))
-          )
-        );
+        // Recargamos para reflejar el nuevo estado (DEVUELTO) y los contadores actualizados.
+        const entregasActualizadas = await fetchEntregas();
+        setEntregasRegistradas(entregasActualizadas || []);
+
         alert('Asignación devuelta correctamente.');
       } catch (error) {
         alert('Hubo un error al intentar devolver la asignación.');
@@ -354,6 +361,8 @@ const AssignmentGradePanel = () => {
                   {asignaciones.map((asignacion) => {
                     const entrega = obtenerEntrega(alumno.id, asignacion.id);
                     const isEntregado = entrega && entrega.nombreArchivo;
+                    //const estaDevuelta = entrega?.estado === 'DEVUELTO';
+                    //const contador = textoContador(entrega);
                     const inputKey = `${alumno.id}-${asignacion.id}`;
                     const estaGuardando = guardandoId === inputKey;
                     const estaDescargando = descargandoId === inputKey;
@@ -366,10 +375,12 @@ const AssignmentGradePanel = () => {
                             <div className="text-sm font-bold text-gray-800 line-clamp-2">{asignacion.titulo}</div>
                             <div className="text-[10px] text-gray-500 uppercase tracking-wide mt-0.5">Valor: {asignacion.porcentaje}%</div>
                           </div>
+                          
                           {isEntregado ? (
                             <span className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold bg-green-100 text-green-700">
                               <i data-lucide="check-circle" className="w-3 h-3"></i> ENTREGADO
                             </span>
+                            
                           ) : (
                             <span className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold bg-yellow-100 text-yellow-700">
                               <i data-lucide="clock" className="w-3 h-3"></i> PENDIENTE
@@ -479,7 +490,9 @@ const AssignmentGradePanel = () => {
                       
                       {asignaciones.map((asignacion) => {
                         const entrega = obtenerEntrega(alumno.id, asignacion.id);
-                        const isEntregado = entrega && entrega.nombreArchivo; 
+                        const isEntregado = entrega && entrega.nombreArchivo;
+                        const estaDevuelta = entrega?.estado === 'DEVUELTO';
+                        const contador = textoContador(entrega);
                         const inputKey = `${alumno.id}-${asignacion.id}`;
                         const estaGuardando = guardandoId === inputKey;
                         const estaDescargando = descargandoId === inputKey;
@@ -491,9 +504,18 @@ const AssignmentGradePanel = () => {
                               <div className="flex flex-col items-center gap-2">
                                 {isEntregado ? (
                                   <>
-                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700">
-                                      <i data-lucide="check-circle" className="w-3 h-3"></i> ENTREGADO
-                                    </span>
+                                    {estaDevuelta ? (
+                                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700">
+                                        <i data-lucide="rotate-ccw" className="w-3 h-3"></i> DEVUELTA
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700">
+                                        <i data-lucide="check-circle" className="w-3 h-3"></i> ENTREGADO
+                                      </span>
+                                    )}
+                                    {contador && (
+                                      <span className="text-[10px] font-medium text-gray-500 text-center">{contador}</span>
+                                    )}
                                     <div className="flex gap-1.5 mt-1">
                                       <button onClick={() => handleVerPreview(entrega)} disabled={estaCargandoPreview} title="Ver previa" className="p-1.5 rounded-md bg-white border border-blue-200 text-blue-600 shadow-sm hover:bg-blue-50 transition-colors">
                                         <i data-lucide={estaCargandoPreview ? "loader-2" : "eye"} className={`w-3.5 h-3.5 ${estaCargandoPreview ? "animate-spin" : ""}`}></i>
@@ -501,9 +523,11 @@ const AssignmentGradePanel = () => {
                                       <button onClick={() => handleDescargarArchivo(entrega)} disabled={estaDescargando} title="Descargar archivo" className="p-1.5 rounded-md bg-white border border-green-200 text-green-700 shadow-sm hover:bg-green-50 transition-colors">
                                         <i data-lucide={estaDescargando ? "loader-2" : "download"} className={`w-3.5 h-3.5 ${estaDescargando ? "animate-spin" : ""}`}></i>
                                       </button>
-                                      <button onClick={() => handleDevolverEntrega(entrega)} title="Devolver asignación" className="p-1.5 rounded-md bg-white border border-red-200 text-red-600 shadow-sm hover:bg-red-50 transition-colors">
-                                        <i data-lucide="rotate-ccw" className="w-3.5 h-3.5"></i>
-                                      </button>
+                                      {!estaDevuelta && (
+                                        <button onClick={() => handleDevolverEntrega(entrega)} title="Devolver asignación" className="p-1.5 rounded-md bg-white border border-red-200 text-red-600 shadow-sm hover:bg-red-50 transition-colors">
+                                          <i data-lucide="rotate-ccw" className="w-3.5 h-3.5"></i>
+                                        </button>
+                                      )}
 
                                       {/* Botón de Candado */}
                                       <button 

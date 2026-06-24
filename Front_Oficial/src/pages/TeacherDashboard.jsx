@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { cerrarSesion } from '../utils/localStorage';
 import ContentManagementPanel from '../components/ContentManagementPanel';
+import ResourceManagerPanel from '../components/ResourceManagerPanel';
 
 const TeacherDashboard = ({ usuario, onNavigate, onLogout }) => {
   const handleCerrarSesion = () => {
@@ -50,6 +51,9 @@ const TeacherDashboard = ({ usuario, onNavigate, onLogout }) => {
       </div>
 
       <ContentManagementPanel roleLabel="Moderación" />
+      <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+        <ResourceManagerPanel />
+      </div>
     </div>
   );
 };

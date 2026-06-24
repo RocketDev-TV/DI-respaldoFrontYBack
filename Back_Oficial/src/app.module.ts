@@ -13,6 +13,7 @@ import { AsignacionModule } from './asignacion/asignacion.module';
 import { VideoModule } from './video/video.module';
 import { EvaluacionModule } from './evaluacion/evaluacion.module';
 import { AuthModule } from './auth/auth.module';
+import { RecursoModule } from './recurso/recurso.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { loadLocalEnvFiles } from './load-env';
@@ -62,6 +63,7 @@ loadLocalEnvFiles();
     VideoModule,
     AuthModule,
     EvaluacionModule,
+    RecursoModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile:

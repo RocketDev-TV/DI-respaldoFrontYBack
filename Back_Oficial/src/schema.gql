@@ -72,6 +72,15 @@ type Contenido {
   videos: [Video!]
 }
 
+input CrearRecursoInput {
+  archivoBase64: String!
+  mimeType: String!
+  nombreArchivo: String!
+  tamano: String
+  tipo: String!
+  titulo: String!
+}
+
 input CreateAlumnoInput {
   apellido: String!
   email: String!
@@ -142,6 +151,8 @@ type Entrega {
   archivoBase64: String
   asignacionId: Int!
   calificacion: Float
+  contadorDevoluciones: Int!
+  contadorEntregas: Int!
   entregadoEn: DateTime
   estado: String!
   id: Int!
@@ -187,12 +198,15 @@ type Mutation {
   crearAlumno(datos: CreateAlumnoInput!): Alumno!
   crearAsignacion(datos: CreateAsignacionInput!): Asignacion!
   crearContenido(datos: CreateContenidoInput!): Contenido!
+  crearRecurso(datos: CrearRecursoInput!): RecursoArchivo!
   crearUnidad(createUnidadInput: CreateUnidadInput!): Unidad!
   crearUsuario(datos: CreateUsuarioInput!): Alumno!
   crearVideo(datos: CreateVideoInput!): Video!
+  desbloquearRespuestas(alumnoId: Int!, asignacionId: Int!, desbloqueadas: Boolean!): Entrega!
   devolverEntrega(alumnoId: Int!, asignacionId: Int!): Boolean!
   eliminarAsignacion(id: Int!): Asignacion!
   eliminarContenido(id: Int!): Contenido!
+  eliminarRecurso(id: Int!): Boolean!
   eliminarUnidad(id: Int!): Unidad!
   eliminarUsuario(id: Int!): Alumno!
   eliminarVideo(id: Int!): Video!
@@ -217,13 +231,28 @@ type Query {
   getKpisGrupo(grupo: String!): AsignacionKpis!
   grupos: [String!]!
   insignias: [Insignia!]!
+  obtenerRecursos: [RecursoArchivo!]!
   ping: String!
+  recurso(id: Int!): RecursoArchivo
   rubricasPorPeriodo(periodo: Int!): [Rubrica!]!
   unidad(id: Int!): Unidad
   unidades(tipoMateria: TipoMateria): [Unidad!]!
   usuarios: [Alumno!]!
   video(id: Int!): Video
   videos(asignacionId: Int, contenidoId: Int, publicado: Boolean): [Video!]!
+}
+
+type RecursoArchivo {
+  archivoBase64: String
+  creadoEn: DateTime
+  creadoPor: String
+  id: Int!
+  mimeType: String!
+  nombreArchivo: String!
+  rolCreador: String
+  tamano: String
+  tipo: String!
+  titulo: String!
 }
 
 input RegistrarEntregaInput {

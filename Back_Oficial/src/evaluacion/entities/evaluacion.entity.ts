@@ -35,6 +35,12 @@ export class Entrega {
 
   @Field(() => Boolean, { defaultValue: false })
   respuestasDesbloqueadas: boolean;
+
+  @Field(() => Int, { defaultValue: 0 })
+  contadorEntregas: number;
+
+  @Field(() => Int, { defaultValue: 0 })
+  contadorDevoluciones: number;
 }
 
 @ObjectType()

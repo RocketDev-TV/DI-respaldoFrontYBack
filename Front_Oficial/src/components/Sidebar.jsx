@@ -57,6 +57,11 @@ const Sidebar = ({
   usuarioLogueado,
   onLogout,
 }) => {
+
+  React.useEffect(() => {
+    if (window.lucide) window.lucide.createIcons();
+  }, [currentView]);
+
   const handleNavigation = (view) => {
     onNavigate(view);
     onMobileClose();
@@ -192,6 +197,16 @@ const Sidebar = ({
 
           {usuarioLogueado && (
             <>
+            <div className="px-4 mt-6 mb-2 text-xs font-semibold text-emerald-400 uppercase tracking-wider">
+                Contenidos
+              </div>
+              {renderNavItems(
+                [{ name: 'Catálogo de Contenidos', icon: 'folder-open' }],
+                currentView,
+                handleNavigation,
+                'bg-gray-900 border-l-4 border-emerald-500 text-white',
+                'text-gray-300 hover:bg-emerald-900/40',
+              )}
               <div className="px-4 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 General
               </div>

@@ -83,11 +83,22 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     upsert: async ({ data }: QueryArgs) => this.upsertEntrega(data),
     delete: async ({ where }: QueryArgs) =>
       this.deleteEntrega(Number(where?.alumnoId), Number(where?.asignacionId)),
+    devolver: async ({ where }: QueryArgs) =>
+      this.devolverEntregaEnDB(Number(where?.alumnoId), Number(where?.asignacionId)),
+    desbloquearRespuestas: async ({ where, data }: QueryArgs) =>
+      this.desbloquearRespuestasEntrega(Number(where?.alumnoId), Number(where?.asignacionId), Boolean(data?.respuestasDesbloqueadas)),
   };
 
   readonly calificacionAsignacion = {
     findMany: async (args?: QueryArgs) => this.findCalificacionesAsignacion(args?.where),
     upsert: async ({ data }: QueryArgs) => this.upsertCalificacionAsignacion(data),
+  };
+
+  readonly recursoArchivo = {
+    findMany: async () => this.findRecursos(),
+    findUnique: async ({ where }: QueryArgs) => this.findRecursoById(Number(where?.id)),
+    create: async ({ data }: QueryArgs) => this.createRecurso(data),
+    delete: async ({ where }: QueryArgs) => this.deleteRecurso(Number(where?.id)),
   };
 
   readonly insignia = {
@@ -384,7 +395,8 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     const whereClause = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
     const rows = await this.queryRows(
       `
-        SELECT id, titulo, descripcion, porcentaje, periodo, grupo, entregable, rubrica, orden, activa, "contenidoId"
+        SELECT id, titulo, descripcion, porcentaje, periodo, grupo, entregable, rubrica, orden, activa, "contenidoId",
+               "archivoRespuestas", "nombreArchivoRespuestas", "mimeTypeRespuestas"
         FROM "Asignacion"
         ${whereClause}
         ORDER BY periodo ASC, orden ASC, id ASC
@@ -398,7 +410,8 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private async findAsignacionById(id: number) {
     const row = await this.queryOne(
       `
-        SELECT id, titulo, descripcion, porcentaje, periodo, grupo, entregable, rubrica, orden, activa, "contenidoId"
+        SELECT id, titulo, descripcion, porcentaje, periodo, grupo, entregable, rubrica, orden, activa, "contenidoId",
+               "archivoRespuestas", "nombreArchivoRespuestas", "mimeTypeRespuestas"
         FROM "Asignacion"
         WHERE id = $1
       `,
@@ -416,9 +429,11 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private async createAsignacion(data?: any) {
     const row = await this.queryOne(
       `
-        INSERT INTO "Asignacion" (titulo, descripcion, porcentaje, periodo, grupo, entregable, rubrica, orden, activa, "contenidoId")
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-        RETURNING id, titulo, descripcion, porcentaje, periodo, grupo, entregable, rubrica, orden, activa, "contenidoId"
+        INSERT INTO "Asignacion" (titulo, descripcion, porcentaje, periodo, grupo, entregable, rubrica, orden, activa, "contenidoId",
+               "archivoRespuestas", "nombreArchivoRespuestas", "mimeTypeRespuestas")
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        RETURNING id, titulo, descripcion, porcentaje, periodo, grupo, entregable, rubrica, orden, activa, "contenidoId",
+               "archivoRespuestas", "nombreArchivoRespuestas", "mimeTypeRespuestas"
       `,
       [
         data?.titulo,
@@ -431,6 +446,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
         data?.orden ?? 0,
         data?.activa ?? true,
         data?.contenidoId ?? null,
+        data?.archivoRespuestas ?? null,
+        data?.nombreArchivoRespuestas ?? null,
+        data?.mimeTypeRespuestas ?? null,
       ],
     );
 
@@ -453,8 +471,11 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
         orden: data?.orden,
         activa: data?.activa,
         '"contenidoId"': data?.contenidoId,
+        '"archivoRespuestas"': data?.archivoRespuestas,
+        '"nombreArchivoRespuestas"': data?.nombreArchivoRespuestas,
+        '"mimeTypeRespuestas"': data?.mimeTypeRespuestas,
       },
-      'RETURNING id, titulo, descripcion, porcentaje, periodo, grupo, entregable, rubrica, orden, activa, "contenidoId"',
+      'RETURNING id, titulo, descripcion, porcentaje, periodo, grupo, entregable, rubrica, orden, activa, "contenidoId", "archivoRespuestas", "nombreArchivoRespuestas", "mimeTypeRespuestas"',
     );
 
     if (!row) {
@@ -753,7 +774,8 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.queryRows(
       `
         SELECT id, "asignacionId", "alumnoId", grupo, parcial, "nombreArchivo", "mimeType", tamano,
-               "archivoBase64", estado, "fechaEntrega" AS "entregadoEn"
+               "archivoBase64", estado, "respuestasDesbloqueadas", "contadorEntregas", "contadorDevoluciones",
+               "fechaEntrega" AS "entregadoEn"
         FROM "Entrega"
         ${whereClause}
         ORDER BY "fechaEntrega" DESC, id DESC
@@ -765,8 +787,8 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private async upsertEntrega(data?: any) {
     return this.queryOne(
       `
-        INSERT INTO "Entrega" ("asignacionId", "alumnoId", grupo, parcial, "nombreArchivo", "mimeType", tamano, "archivoBase64", estado, "fechaEntrega")
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'entregado', NOW())
+        INSERT INTO "Entrega" ("asignacionId", "alumnoId", grupo, parcial, "nombreArchivo", "mimeType", tamano, "archivoBase64", estado, "fechaEntrega", "contadorEntregas")
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'entregado', NOW(), 1)
         ON CONFLICT ("asignacionId", "alumnoId", parcial)
         DO UPDATE SET
           grupo = EXCLUDED.grupo,
@@ -775,9 +797,12 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
           tamano = EXCLUDED.tamano,
           "archivoBase64" = EXCLUDED."archivoBase64",
           estado = 'entregado',
-          "fechaEntrega" = NOW()
+          "fechaEntrega" = NOW(),
+          "contadorEntregas" = "Entrega"."contadorEntregas" + 1,
+          "respuestasDesbloqueadas" = FALSE
         RETURNING id, "asignacionId", "alumnoId", grupo, parcial, "nombreArchivo", "mimeType", tamano,
-                  "archivoBase64", estado, "fechaEntrega" AS "entregadoEn"
+                  "archivoBase64", estado, "respuestasDesbloqueadas", "contadorEntregas", "contadorDevoluciones",
+                  "fechaEntrega" AS "entregadoEn"
       `,
       [
         data?.asignacionId,
@@ -794,12 +819,28 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
 
   private async deleteEntrega(alumnoId: number, asignacionId: number) {
     return this.queryOne(
-      `
-        DELETE FROM "Entrega"
-        WHERE "alumnoId" = $1 AND "asignacionId" = $2
-        RETURNING id
-      `,
+      `DELETE FROM "Entrega" WHERE "alumnoId" = $1 AND "asignacionId" = $2 RETURNING id`,
       [alumnoId, asignacionId],
+    );
+  }
+
+  private async devolverEntregaEnDB(alumnoId: number, asignacionId: number) {
+    await this.queryOne(
+      `UPDATE "Entrega"
+       SET estado = 'DEVUELTO', "contadorDevoluciones" = "contadorDevoluciones" + 1
+       WHERE "alumnoId" = $1 AND "asignacionId" = $2`,
+      [alumnoId, asignacionId],
+    );
+    return true;
+  }
+
+  private async desbloquearRespuestasEntrega(alumnoId: number, asignacionId: number, desbloqueadas: boolean) {
+    return this.queryOne(
+      `UPDATE "Entrega"
+       SET "respuestasDesbloqueadas" = $1
+       WHERE "alumnoId" = $2 AND "asignacionId" = $3
+       RETURNING id, "respuestasDesbloqueadas"`,
+      [desbloqueadas, alumnoId, asignacionId],
     );
   }
 
@@ -861,6 +902,33 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
         data?.observaciones ?? '',
       ],
     );
+  }
+
+  private async findRecursos() {
+    return this.queryRows(
+      'SELECT id, tipo, titulo, tamano, "mimeType", "nombreArchivo", "creadoEn", "creadoPor", "rolCreador" FROM "RecursoArchivo" ORDER BY "creadoEn" DESC',
+    );
+  }
+
+  private async findRecursoById(id: number) {
+    return this.queryOne(
+      'SELECT id, tipo, titulo, tamano, "mimeType", "nombreArchivo", "archivoBase64", "creadoEn", "creadoPor", "rolCreador" FROM "RecursoArchivo" WHERE id = $1',
+      [id],
+    );
+  }
+
+  private async createRecurso(data?: any) {
+    return this.queryOne(
+      `INSERT INTO "RecursoArchivo" (tipo, titulo, tamano, "mimeType", "nombreArchivo", "archivoBase64", "creadoPor", "rolCreador")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING id, tipo, titulo, tamano, "mimeType", "nombreArchivo", "creadoEn", "creadoPor", "rolCreador"`,
+      [data?.tipo, data?.titulo, data?.tamano ?? null, data?.mimeType, data?.nombreArchivo, data?.archivoBase64, data?.creadoPor ?? '', data?.rolCreador ?? ''],
+    );
+  }
+
+  private async deleteRecurso(id: number): Promise<boolean> {
+    await this.queryOne('DELETE FROM "RecursoArchivo" WHERE id = $1', [id]);
+    return true;
   }
 
   private async queryRows(sql: string, params: unknown[] = []) {
@@ -1065,6 +1133,38 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
         UNIQUE ("asignacionId", "alumnoId", parcial)
       )
     `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS "RecursoArchivo" (
+        id SERIAL PRIMARY KEY,
+        tipo TEXT NOT NULL DEFAULT 'documento',
+        titulo TEXT NOT NULL,
+        tamano TEXT,
+        "mimeType" TEXT NOT NULL,
+        "nombreArchivo" TEXT NOT NULL,
+        "archivoBase64" TEXT NOT NULL,
+        "creadoEn" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        "creadoPor" TEXT NOT NULL DEFAULT '',
+        "rolCreador" TEXT NOT NULL DEFAULT ''
+      )
+    `);
+
+    await this.pool.query(`
+      ALTER TABLE "RecursoArchivo" ADD COLUMN IF NOT EXISTS "creadoPor" TEXT NOT NULL DEFAULT '';
+      ALTER TABLE "RecursoArchivo" ADD COLUMN IF NOT EXISTS "rolCreador" TEXT NOT NULL DEFAULT '';
+    `).catch(() => {});
+
+    await this.pool.query(`
+      ALTER TABLE "Entrega" ADD COLUMN IF NOT EXISTS "respuestasDesbloqueadas" BOOLEAN NOT NULL DEFAULT FALSE;
+      ALTER TABLE "Entrega" ADD COLUMN IF NOT EXISTS "contadorEntregas" INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE "Entrega" ADD COLUMN IF NOT EXISTS "contadorDevoluciones" INTEGER NOT NULL DEFAULT 0;
+    `).catch(() => {});
+
+    await this.pool.query(`
+      ALTER TABLE "Asignacion" ADD COLUMN IF NOT EXISTS "archivoRespuestas" TEXT;
+      ALTER TABLE "Asignacion" ADD COLUMN IF NOT EXISTS "nombreArchivoRespuestas" TEXT;
+      ALTER TABLE "Asignacion" ADD COLUMN IF NOT EXISTS "mimeTypeRespuestas" TEXT;
+    `).catch(() => {});
 
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS "VerificationCode" (

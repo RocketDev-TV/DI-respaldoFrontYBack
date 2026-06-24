@@ -18,6 +18,8 @@ function buildChecklist(parcial, asignaciones) {
       rubrica: asignacion.rubrica,
       videos: asignacion.videos || [],
       archivoRespuestas: asignacion.archivoRespuestas,
+      nombreArchivoRespuestas: asignacion.nombreArchivoRespuestas,
+      mimeTypeRespuestas: asignacion.mimeTypeRespuestas,
     })),
   };
 }

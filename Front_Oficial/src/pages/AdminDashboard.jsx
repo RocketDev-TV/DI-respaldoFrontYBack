@@ -9,6 +9,7 @@ import {
 } from '../services/authApi';
 import { cerrarSesion } from '../utils/localStorage';
 import ContentManagementPanel from '../components/ContentManagementPanel';
+import ResourceManagerPanel from '../components/ResourceManagerPanel';
 import AssignmentGradePanel from '../components/AssignmentGradePanel';
 import StudentAnalyticsPanel from '../pages/StudentAnalyticsPanel';
 
@@ -479,8 +480,13 @@ const AdminDashboard = ({ usuario, onNavigate, onLogout }) => {
       ) : tabActiva === 'analiticas' ? (
         <StudentAnalyticsPanel />
       ) : (
-        <ContentManagementPanel roleLabel="Administración" />
-)}
+        <div className="space-y-8">
+          <ContentManagementPanel roleLabel="Administración" />
+          <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+            <ResourceManagerPanel />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -29,7 +29,13 @@ async function graphqlRequest(query, variables) {
         'El archivo excede el limite permitido por el servidor. Reduce el tamano e intenta de nuevo.',
       );
     }
-    throw new Error(`Error HTTP ${response.status}`);
+    // Intenta extraer el motivo real de GraphQL del cuerpo (ej. campo invalido en 400).
+    const detalle = await response
+      .clone()
+      .json()
+      .then((body) => body.errors?.[0]?.message)
+      .catch(() => null);
+    throw new Error(detalle || `Error HTTP ${response.status}`);
   }
 
   const payload = await response.json();
@@ -198,6 +204,8 @@ export async function fetchEntregas() {
         calificacion
         estado
         respuestasDesbloqueadas
+        contadorEntregas
+        contadorDevoluciones
       }
     }`
   );
@@ -207,10 +215,7 @@ export async function fetchEntregas() {
 export async function devolverEntrega(alumnoId, asignacionId) {
   const data = await graphqlRequest(
     `mutation DevolverEntrega($alumnoId: Int!, $asignacionId: Int!) {
-      devolverEntrega(alumnoId: $alumnoId, asignacionId: $asignacionId) { 
-        id 
-        estado 
-      }
+      devolverEntrega(alumnoId: $alumnoId, asignacionId: $asignacionId)
     }`,
     { alumnoId: Number(alumnoId), asignacionId: Number(asignacionId) },
   );

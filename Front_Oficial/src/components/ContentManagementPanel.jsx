@@ -21,6 +21,29 @@ const COURSE_OPTIONS = Object.entries(COURSE_TO_TIPO_MATERIA);
 const CONTENT_TYPES = ['LECCION', 'RECURSO', 'TAREA'];
 const VIDEO_TYPES = ['APRENDIZAJE', 'ACTIVIDAD', 'OTRO'];
 
+function tipoArchivoRespuestas(nombre = '', mime = '') {
+  const ext = (nombre.split('.').pop() || '').toLowerCase();
+  if (ext === 'pdf' || mime.includes('pdf')) {
+    return { label: 'PDF', color: 'bg-red-100 text-red-700', icon: 'file-text' };
+  }
+  if (['doc', 'docx'].includes(ext) || mime.includes('word')) {
+    return { label: 'DOCX', color: 'bg-blue-100 text-blue-700', icon: 'file-text' };
+  }
+  if (['xls', 'xlsx'].includes(ext) || mime.includes('sheet') || mime.includes('excel')) {
+    return { label: 'XLSX', color: 'bg-green-100 text-green-700', icon: 'sheet' };
+  }
+  if (['ppt', 'pptx'].includes(ext) || mime.includes('presentation')) {
+    return { label: 'PPTX', color: 'bg-orange-100 text-orange-700', icon: 'presentation' };
+  }
+  if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext) || mime.startsWith('image/')) {
+    return { label: 'Imagen', color: 'bg-purple-100 text-purple-700', icon: 'image' };
+  }
+  if (['zip', 'rar'].includes(ext) || mime.includes('zip')) {
+    return { label: 'ZIP', color: 'bg-gray-200 text-gray-700', icon: 'archive' };
+  }
+  return { label: ext ? ext.toUpperCase() : 'Archivo', color: 'bg-gray-100 text-gray-700', icon: 'file' };
+}
+
 const INITIAL_CONTENT = {
   id: null,
   titulo: '',
@@ -178,6 +201,10 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
   const [videoDraft, setVideoDraft] = React.useState(INITIAL_VIDEO);
   const [assignmentDraft, setAssignmentDraft] = React.useState(INITIAL_ASSIGNMENT);
 
+  // Req #5: modal de confirmacion al borrar el banco de respuestas y modo "reemplazar".
+  const [mostrarConfirmBorrado, setMostrarConfirmBorrado] = React.useState(false);
+  const [reemplazandoArchivo, setReemplazandoArchivo] = React.useState(false);
+
   const tipoMateria = COURSE_TO_TIPO_MATERIA[selectedCourse];
   const opcionesUnidad = React.useMemo(
     () => unidades.map(({ unidad }) => unidad),
@@ -282,6 +309,11 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
     setVideoDraft(INITIAL_VIDEO);
     setAssignmentDraft(INITIAL_ASSIGNMENT);
   }, [selectedCourse]);
+
+  // Re-renderiza los iconos lucide cuando cambian los datos del catalogo o el formulario.
+  React.useEffect(() => {
+    if (window.lucide) window.lucide.createIcons();
+  }, [unidades, catalogoContenidos, assignmentDraft, reemplazandoArchivo, mostrarConfirmBorrado, loading]);
 
   const resetMessages = () => {
     setError('');
@@ -405,6 +437,54 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
     reader.readAsDataURL(file);
   };
 
+  // Req #5: solo se ejecuta si el usuario confirma en el modal de advertencia.
+  const confirmarBorradoRespuestas = () => {
+    setAssignmentDraft((prev) => ({
+      ...prev,
+      archivoRespuestas: '',
+      nombreArchivoRespuestas: '',
+      mimeTypeRespuestas: '',
+    }));
+    setReemplazandoArchivo(false);
+    setMostrarConfirmBorrado(false);
+  };
+
+  // Parcha (o agrega) una asignación dentro de su contenido en el estado local,
+  // para que el cambio se refleje al instante sin esperar el refetch.
+  const aplicarAsignacionLocal = React.useCallback((asignacion) => {
+    if (!asignacion) return;
+    const contenidoId = Number(asignacion.contenidoId);
+
+    const parchearContenido = (contenido) => {
+      if (Number(contenido.contenido_id) !== contenidoId) return contenido;
+      const asignaciones = contenido.asignaciones || [];
+      const existe = asignaciones.some((item) => Number(item.id) === Number(asignacion.id));
+      // Conserva los videos vinculados existentes si la mutación no los devuelve poblados.
+      const fusionar = (item) => ({
+        ...item,
+        ...asignacion,
+        videos: asignacion.videos?.length ? asignacion.videos : item.videos,
+      });
+
+      return {
+        ...contenido,
+        asignaciones: existe
+          ? asignaciones.map((item) =>
+              Number(item.id) === Number(asignacion.id) ? fusionar(item) : item,
+            )
+          : [...asignaciones, asignacion],
+      };
+    };
+
+    setCatalogoContenidos((current) => current.map(parchearContenido));
+    setUnidades((current) =>
+      current.map((entrada) => ({
+        ...entrada,
+        contenidos: (entrada.contenidos || []).map(parchearContenido),
+      })),
+    );
+  }, []);
+
   const handleAssignmentSubmit = async (event) => {
     event.preventDefault();
     resetMessages();
@@ -420,15 +500,25 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
       grupo: datosLimpios.grupo || ""
     };
 
+    if (!datosLimpios.nombreArchivoRespuestas || datosLimpios.nombreArchivoRespuestas === '') {
+      payload.nombreArchivoRespuestas = "";
+      payload.archivoRespuestas = "";
+      payload.mimeTypeRespuestas = "";
+    }
+
     try {
       if (id) {
-        await actualizarAsignacion({ ...payload, id: Number(id) });
+        const actualizada = await actualizarAsignacion({ ...payload, id: Number(id) });
+        aplicarAsignacionLocal(actualizada);
         showSuccess('Asignación actualizada.');
       } else {
-        await crearAsignacion(payload);
+        const creada = await crearAsignacion(payload);
+        aplicarAsignacionLocal(creada);
         showSuccess('Asignación creada.');
       }
       setAssignmentDraft(INITIAL_ASSIGNMENT);
+      setReemplazandoArchivo(false);
+      // Refetch de respaldo para mantener todo consistente con el servidor.
       await cargarContenido();
     } catch (submitError) {
       console.error("Error al guardar asignación:", submitError);
@@ -466,6 +556,8 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
 
   const startEditAssignment = (asignacion) => {
     const contenido = findContenidoById(asignacion.contenidoId);
+    setReemplazandoArchivo(false);
+    setMostrarConfirmBorrado(false);
     setAssignmentDraft({
       id: asignacion.id,
       titulo: asignacion.titulo,
@@ -871,7 +963,7 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
             className="w-full rounded-lg border border-gray-300 px-4 py-2"
           />
           
-          {/* NUEVO: Subida de archivo real para respuestas */}
+          {/* NUEVO: Subida / edición del banco de respuestas (Req #4 y #5) */}          
           <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
             <h4 className="text-sm font-bold text-amber-800 flex items-center gap-2 mb-2">
               <i data-lucide="unlock" className="w-4 h-4"></i>
@@ -880,30 +972,67 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
             <p className="text-xs text-amber-700 mb-3">
               Sube el archivo (PDF, Word, etc.) con las respuestas. Podrás liberarlo a los alumnos desde el panel de calificaciones.
             </p>
-            {assignmentDraft.nombreArchivoRespuestas ? (
-              <div className="flex items-center justify-between bg-white border border-amber-300 p-2.5 rounded-lg shadow-sm">
-                <span className="text-sm text-gray-700 truncate pr-4 font-medium flex items-center">
-                  <i data-lucide="file-check" className="w-4 h-4 mr-2 text-amber-600"></i>
-                  {assignmentDraft.nombreArchivoRespuestas}
-                </span>
-                <button 
-                  type="button" 
-                  onClick={() => setAssignmentDraft({ ...assignmentDraft, archivoRespuestas: '', nombreArchivoRespuestas: '', mimeTypeRespuestas: '' })}
-                  className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1.5 rounded-md transition-colors flex items-center gap-1 text-xs font-bold"
-                >
-                  <i data-lucide="x" className="w-3.5 h-3.5"></i> Quitar
-                </button>
+             {assignmentDraft.nombreArchivoRespuestas && !reemplazandoArchivo ? (
+              <div className="bg-white border border-amber-300 p-3 rounded-lg shadow-sm space-y-3">
+                <div className="flex items-center gap-2">
+                  {(() => {
+                    const t = tipoArchivoRespuestas(
+                      assignmentDraft.nombreArchivoRespuestas,
+                      assignmentDraft.mimeTypeRespuestas,
+                    );
+                    return (
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${t.color}`}>
+                        <i data-lucide={t.icon} className="w-3 h-3"></i>
+                        {t.label}
+                      </span>
+                    );
+                  })()}
+                  <span
+                    className="text-sm text-gray-700 truncate font-medium"
+                    title={assignmentDraft.nombreArchivoRespuestas}
+                  >
+                    {assignmentDraft.nombreArchivoRespuestas}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={(e) => { e.preventDefault(); setReemplazandoArchivo(true); }}
+                    className="flex items-center gap-1 rounded-md bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-700 hover:bg-amber-200 transition-colors"
+                  >
+                    <i data-lucide="refresh-cw" className="w-3.5 h-3.5"></i>
+                    Seleccionar nuevo archivo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.preventDefault(); setMostrarConfirmBorrado(true); }}
+                    className="flex items-center gap-1 rounded-md bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-100 transition-colors"
+                  >
+                    <i data-lucide="trash-2" className="w-3.5 h-3.5"></i>
+                    Borrar archivo
+                  </button>
+                </div>
               </div>
             ) : (
-              <input
-                type="file"
-                onChange={handleFileUpload}
-                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200 cursor-pointer transition-colors"
-              />
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  onChange={handleFileUpload}
+                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200 cursor-pointer transition-colors"
+                />
+                {reemplazandoArchivo && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.preventDefault(); setReemplazandoArchivo(false); }}
+                    className="text-xs font-semibold text-gray-500 hover:text-gray-700"
+                  >
+                    Cancelar y conservar el archivo actual
+                  </button>
+                )}
+              </div>
             )}
           </div>
-
-          <div>
+            <div>
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-gray-400">
               Vincular videos
             </p>
@@ -1053,8 +1182,10 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
                                     <button
                                       type="button"
                                       onClick={async () => {
-                                        await eliminarAsignacion(asignacion.id);
-                                        await cargarContenido();
+                                        if (window.confirm('¿Estás seguro de eliminar esta asignación?')) {
+                                          await eliminarAsignacion(asignacion.id);
+                                          await cargarContenido();
+                                        }
                                       }}
                                       className="text-xs font-semibold text-red-700"
                                     >
@@ -1062,6 +1193,32 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
                                     </button>
                                   </div>
                                 </div>
+
+                                {/* Req #4: preview del banco de respuestas almacenado en BD */}
+                                {asignacion.nombreArchivoRespuestas ? (
+                                  (() => {
+                                    const t = tipoArchivoRespuestas(
+                                      asignacion.nombreArchivoRespuestas,
+                                      asignacion.mimeTypeRespuestas,
+                                    );
+                                    return (
+                                      <div className="mt-2 flex items-center gap-1.5 border-t border-gray-100 pt-2">
+                                        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${t.color}`}>
+                                          <i data-lucide={t.icon} className="w-3 h-3"></i>
+                                          {t.label}
+                                        </span>
+                                        <span className="text-[11px] text-gray-600 truncate" title={asignacion.nombreArchivoRespuestas}>
+                                          {asignacion.nombreArchivoRespuestas}
+                                        </span>
+                                      </div>
+                                    );
+                                  })()
+                                ) : (
+                                  <p className="mt-2 flex items-center gap-1 border-t border-gray-100 pt-2 text-[11px] italic text-gray-400">
+                                    <i data-lucide="file-x" className="w-3 h-3"></i>
+                                    Sin banco de respuestas
+                                  </p>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -1075,6 +1232,46 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
           </div>
         )}
       </div>
+
+      {/* Req #5: modal de advertencia para borrar el banco de respuestas */}
+      {mostrarConfirmBorrado && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start gap-3">
+              <div className="rounded-full bg-red-100 p-2 text-red-600">
+                <i data-lucide="alert-triangle" className="w-6 h-6"></i>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Eliminar banco de respuestas</h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  ¿Estás seguro de que deseas eliminar el banco de respuestas? Esta acción no se puede deshacer.
+                </p>
+                {assignmentDraft.nombreArchivoRespuestas && (
+                  <p className="mt-2 text-xs font-medium text-gray-500 truncate">
+                    Archivo: {assignmentDraft.nombreArchivoRespuestas}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setMostrarConfirmBorrado(false)}
+                className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={confirmarBorradoRespuestas}
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors"
+              >
+                Confirmar eliminación
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -14,6 +14,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import GenericPage from './pages/GenericPage';
 import SearchResults from './pages/SearchResults';
 import JflapTutorialPage from './pages/JflapTutorialPage';
+import ContenidosCatalogoPage from './pages/ContenidosCatalogoPage';
 import Downloads from './pages/Downloads';
 import Presentations from './pages/Presentations';
 import { mockFiles } from './data/mockData';
@@ -112,6 +113,12 @@ function App() {
       case 'Presentaciones':
         return usuarioLogueado ? (
           <Presentations />
+        ) : (
+          <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
+        );
+      case 'Catálogo de Contenidos':
+        return usuarioLogueado ? (
+          <ContenidosCatalogoPage />
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );

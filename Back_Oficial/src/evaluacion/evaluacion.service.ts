@@ -81,34 +81,14 @@ export class EvaluacionService {
   }
 
   async devolverEntrega(alumnoId: number, asignacionId: number): Promise<boolean> {
-    await this.prisma.entrega.delete({
-      where: { alumnoId, asignacionId },
-    });
+    await this.prisma.entrega.devolver({ where: { alumnoId, asignacionId } });
     return true;
   }
 
   async desbloquearRespuestas(alumnoId: number, asignacionId: number, desbloqueadas: boolean) {
-    const todasLasEntregas = await this.prisma.entrega.findMany() as any[];
-    const entrega = todasLasEntregas.find(
-      (e) => Number(e.alumnoId) === Number(alumnoId) && Number(e.asignacionId) === Number(asignacionId)
-    );
-    
-    if (!entrega) throw new Error('Entrega no encontrada');
-
-    const entregaLimpia = {
-      id: entrega.id,
-      alumnoId: entrega.alumnoId,
-      asignacionId: entrega.asignacionId,
-      entregadoEn: entrega.entregadoEn,
-      calificacion: entrega.calificacion,
-      nombreArchivo: entrega.nombreArchivo,
-      mimeType: entrega.mimeType,
-      tamano: entrega.tamano,
-      archivoBase64: entrega.archivoBase64,
-      estado: entrega.estado,
-      respuestasDesbloqueadas: desbloqueadas
-    };
-
-    return await this.prisma.entrega.upsert({ data: entregaLimpia });
+    return this.prisma.entrega.desbloquearRespuestas({
+      where: { alumnoId, asignacionId },
+      data: { respuestasDesbloqueadas: desbloqueadas },
+    });
   }
 }

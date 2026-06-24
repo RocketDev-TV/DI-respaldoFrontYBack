@@ -68,6 +68,17 @@ export class EvaluacionResolver {
     return this.evaluacionService.guardarCalificacion(datos);
   }
 
+  @Mutation(() => Entrega, { name: 'desbloquearRespuestas' })
+  async desbloquearRespuestas(
+    @Args('alumnoId', { type: () => Int }) alumnoId: number,
+    @Args('asignacionId', { type: () => Int }) asignacionId: number,
+    @Args('desbloqueadas', { type: () => Boolean }) desbloqueadas: boolean,
+    @Context() context: any,
+  ) {
+    this.alumnoService.requireRoles(context, [RolUsuario.MODERADOR, RolUsuario.ADMINISTRADOR]);
+    return this.evaluacionService.desbloquearRespuestas(alumnoId, asignacionId, desbloqueadas);
+  }
+
   @Mutation(() => Boolean, { name: 'devolverEntrega' })
   async devolverEntrega(
     @Args('alumnoId', { type: () => Int }) alumnoId: number,
