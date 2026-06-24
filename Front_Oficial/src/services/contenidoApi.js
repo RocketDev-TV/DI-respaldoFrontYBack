@@ -588,7 +588,12 @@ export async function actualizarAsignacion(payload) {
         porcentaje:
           payload.porcentaje !== undefined ? Number(payload.porcentaje) : undefined,
         orden: payload.orden !== undefined ? Number(payload.orden) : undefined,
-        contenidoId: payload.contenidoId ? Number(payload.contenidoId) : null,
+        contenidoId:
+          payload.contenidoId !== undefined
+            ? payload.contenidoId
+              ? Number(payload.contenidoId)
+              : null
+            : undefined,
         videoIds: payload.videoIds ? payload.videoIds.map(Number) : undefined,
       },
     },

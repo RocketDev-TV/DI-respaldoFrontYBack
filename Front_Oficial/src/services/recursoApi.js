@@ -53,6 +53,8 @@ export async function obtenerRecursos() {
           mimeType
           nombreArchivo
           creadoEn
+          creadoPor
+          rolCreador
         }
       }
     `,

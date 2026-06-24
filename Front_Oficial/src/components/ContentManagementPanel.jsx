@@ -424,21 +424,41 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
       return;
     }
 
+    const esReemplazo = reemplazandoArchivo;
+    const asignacionId = assignmentDraft.id;
+
     const reader = new FileReader();
-    reader.onload = (upload) => {
+    reader.onload = async (upload) => {
       const base64Raw = upload.target.result.split(',')[1];
-      setAssignmentDraft({
-        ...assignmentDraft,
+      setAssignmentDraft((prev) => ({
+        ...prev,
         archivoRespuestas: base64Raw,
         nombreArchivoRespuestas: file.name,
         mimeTypeRespuestas: file.type,
-      });
+      }));
+
+      // Si estamos reemplazando un archivo existente, guardar inmediatamente en BD.
+      if (esReemplazo && asignacionId) {
+        try {
+          await actualizarAsignacion({
+            id: Number(asignacionId),
+            archivoRespuestas: base64Raw,
+            nombreArchivoRespuestas: file.name,
+            mimeTypeRespuestas: file.type,
+          });
+          setReemplazandoArchivo(false);
+          showSuccess('Archivo de respuestas actualizado.');
+          await cargarContenido();
+        } catch (err) {
+          setError(err.message || 'No fue posible actualizar el archivo de respuestas.');
+        }
+      }
     };
     reader.readAsDataURL(file);
   };
 
   // Req #5: solo se ejecuta si el usuario confirma en el modal de advertencia.
-  const confirmarBorradoRespuestas = () => {
+  const confirmarBorradoRespuestas = async () => {
     setAssignmentDraft((prev) => ({
       ...prev,
       archivoRespuestas: '',
@@ -447,6 +467,22 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
     }));
     setReemplazandoArchivo(false);
     setMostrarConfirmBorrado(false);
+
+    // Si estamos editando una asignación existente, persistir el borrado en BD inmediatamente.
+    if (assignmentDraft.id) {
+      try {
+        await actualizarAsignacion({
+          id: Number(assignmentDraft.id),
+          archivoRespuestas: '',
+          nombreArchivoRespuestas: '',
+          mimeTypeRespuestas: '',
+        });
+        showSuccess('Banco de respuestas eliminado.');
+        await cargarContenido();
+      } catch (err) {
+        setError(err.message || 'No fue posible eliminar el banco de respuestas.');
+      }
+    }
   };
 
   // Parcha (o agrega) una asignación dentro de su contenido en el estado local,

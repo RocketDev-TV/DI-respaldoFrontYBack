@@ -185,9 +185,9 @@ const ContenidosCatalogoPage = () => {
                           </span>
                           {recurso.creadoEn && (
                             <span className="inline-flex items-center gap-1">
-                            <User className="h-3 w-3" />
-                            {recurso.creadoPor || 'Desconocido'} • {recurso.rolCreador || 'Sin clasificar'}
-                          </span>
+                              <Calendar className="h-3 w-3" />
+                              {formatearFecha(recurso.creadoEn)}
+                            </span>
                           )}
                         </div>
                       </div>
