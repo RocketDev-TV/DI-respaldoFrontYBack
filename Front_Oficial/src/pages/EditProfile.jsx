@@ -70,7 +70,7 @@ const EditProfile = ({ usuario, onNavigate }) => {
         },
         body: JSON.stringify({
           query: `
-            mutation ActualizarUsuario($datos: UpdateUsuarioAdminInput!) {
+            mutation ActualizarUsuario($datos: UpdateUsuarioInput!) {
                 actualizarUsuario(datos: $datos) {
                   id
                   nombre

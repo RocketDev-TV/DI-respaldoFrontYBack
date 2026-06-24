@@ -2,7 +2,6 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { decodeIncomingPassword, hashPassword } from './auth.utils';
-import { UpdateUsuarioInput } from './dto/update-usuario.input';
 
 @Injectable()
 export class AuthService {
@@ -58,6 +57,9 @@ export class AuthService {
     }
 
     const passwordPlano = decodeIncomingPassword(nuevoPasswordEncriptado);
+    if (passwordPlano.length < 6) {
+      throw new BadRequestException('La contraseña debe tener al menos 6 caracteres');
+    }
     const passwordHasheado = hashPassword(passwordPlano);
 
     await this.prisma.alumno.update({
@@ -70,26 +72,5 @@ export class AuthService {
     });
 
     return true;
-  }
-
-  async actualizarUsuario(datos: UpdateUsuarioInput) {
-    const updateData: any = {};
-
-    if (datos.nombre !== undefined) updateData.nombre = datos.nombre.trim();
-    if (datos.apellido !== undefined) updateData.apellido = datos.apellido.trim();
-    if (datos.email !== undefined) updateData.email = datos.email.toLowerCase().trim();
-    if (datos.grupo !== undefined) updateData.grupo = datos.grupo.trim();
-    if (datos.rol !== undefined) updateData.rol = datos.rol;
-    if (datos.estado !== undefined) updateData.estado = datos.estado;
-
-    if (datos.password && datos.password.trim() !== '') {
-      const passwordPlano = decodeIncomingPassword(datos.password.trim());
-      updateData.password = hashPassword(passwordPlano);
-    }
-
-    return this.prisma.alumno.update({
-      where: { id: datos.id },
-      data: updateData,
-    });
   }
 }

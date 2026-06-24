@@ -168,10 +168,10 @@ export async function fetchKpisGrupo(grupo) {
     `
       query GetKpisGrupo($grupo: String) {
         getKpisGrupo(grupo: $grupo) {
-          totalAlumnos
+          alumnosEnRiesgo
           entregasRealizadas
           tasaCumplimiento
-          alumnosEnRiesgo
+          totalAlumnos
         }
       }
     `,
@@ -181,64 +181,51 @@ export async function fetchKpisGrupo(grupo) {
   return data.getKpisGrupo;
 }
 
+// ==========================================
+// FUNCIONES RESTAURADAS PARA EL PANEL PRO
+// ==========================================
+
+export async function fetchEntregas() {
+  const data = await graphqlRequest(
+    `query {
+      entregas {
+        id
+        alumnoId
+        asignacionId
+        nombreArchivo
+        mimeType
+        entregadoEn
+        calificacion
+        estado
+        respuestasDesbloqueadas
+      }
+    }`
+  );
+  return data.entregas;
+}
 
 export async function devolverEntrega(alumnoId, asignacionId) {
   const data = await graphqlRequest(
-    `
-      mutation DevolverEntrega($alumnoId: Int!, $asignacionId: Int!) {
-        devolverEntrega(alumnoId: $alumnoId, asignacionId: $asignacionId)
+    `mutation DevolverEntrega($alumnoId: Int!, $asignacionId: Int!) {
+      devolverEntrega(alumnoId: $alumnoId, asignacionId: $asignacionId) { 
+        id 
+        estado 
       }
-    `,
-    { 
-      alumnoId: Number(alumnoId), 
-      asignacionId: Number(asignacionId) 
-    }
+    }`,
+    { alumnoId: Number(alumnoId), asignacionId: Number(asignacionId) },
   );
-
   return data.devolverEntrega;
-}
-
-export async function fetchEntregas(filtros = {}) {
-  const variables = {};
-  if (filtros.alumnoId) variables.alumnoId = Number(filtros.alumnoId);
-  if (filtros.asignacionId) variables.asignacionId = Number(filtros.asignacionId);
-
-  const data = await graphqlRequest(
-    `
-      query Entregas($alumnoId: Int, $asignacionId: Int) {
-        entregas(alumnoId: $alumnoId, asignacionId: $asignacionId) {
-          id
-          asignacionId
-          alumnoId
-          nombreArchivo
-          mimeType
-          tamano
-          entregadoEn
-          estado
-          respuestasDesbloqueadas
-        }
-      }
-    `,
-    variables
-  );
-  return data.entregas || [];
 }
 
 export async function desbloquearRespuestas(alumnoId, asignacionId, desbloqueadas) {
   const data = await graphqlRequest(
-    `
-      mutation DesbloquearRespuestas($alumnoId: Int!, $asignacionId: Int!, $desbloqueadas: Boolean!) {
-        desbloquearRespuestas(alumnoId: $alumnoId, asignacionId: $asignacionId, desbloqueadas: $desbloqueadas) {
-          id
-          respuestasDesbloqueadas
-        }
+    `mutation DesbloquearRespuestas($alumnoId: Int!, $asignacionId: Int!, $desbloqueadas: Boolean!) {
+      desbloquearRespuestas(alumnoId: $alumnoId, asignacionId: $asignacionId, desbloqueadas: $desbloqueadas) { 
+        id 
+        respuestasDesbloqueadas 
       }
-    `,
-    {
-      alumnoId: Number(alumnoId),
-      asignacionId: Number(asignacionId),
-      desbloqueadas: Boolean(desbloqueadas)
-    }
+    }`,
+    { alumnoId: Number(alumnoId), asignacionId: Number(asignacionId), desbloqueadas },
   );
   return data.desbloquearRespuestas;
 }

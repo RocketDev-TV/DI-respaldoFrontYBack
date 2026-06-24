@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import { AreaComputacion } from "./enum";
 
 export const TipoContenido = {

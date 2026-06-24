@@ -1,8 +1,10 @@
 const { spawn } = require('child_process');
 const path = require('path');
+const { loadEnvFiles } = require('./env-loader');
 
 const children = [];
 const rootDir = path.resolve(__dirname, '..');
+loadEnvFiles(rootDir);
 
 startApi();
 startClient();

@@ -1,0 +1,578 @@
+tecla F1 a [ayuda], f2 [calcula]
+
+DEFINIENDO [ M A N U A L  DIDACMAX] COLOR TAMARILLO/Frojo,TAMARILLO/Frojo,\
+TAZULCIELO/Frojo,TAZUL/FAZULCIELO
+DIDACMAX 2000, es un compilador que permite producir
+ventanas con hipertextos para diferentes aplicaciones.
+Este curso est  producido con el propio DIDACMAX 2000.
+
+        |El Editor de Textos|
+        |El comando definiendo|
+        |El comando tecla|
+        |Formando hipertextos|
+        |Programas y utiler¡as|
+        |Caracteres especiales|
+        |La compilaci¢n|
+        |Ejemplo de c¢digo|
+.Fin
+DEFINIENDO [El Editor de Textos] EN -1,-1 COLOR TAMARILLO/FAZULCIELO,\
+TAMARILLO/FAZULCIELO,,
+Para generar ventanas de hipertexto con DIDACMAX 2000
+se requiere  del auxilio de un editor de textos capaz
+de generar  archivos en formato ASCII, este puede ser
+Word Star,  Side Kick,  Q Editor, Professional Write,
+Word, etc. casi todos los procesadores de texto tienen
+esta capacidad, utilice el de su preferencia.
+.fin
+DEFINIENDO [El comando definiendo] EN -1,-1 COLOR TAMARILLO/FAZULCIELO,TAMARILLO/FAZULCIELO,TAZUL/FAZULCIELO,TROJO/FAZULCIELO
+Por cada |hipertexto|  que  se  declare,  es necesario utilizar un
+comando DEFINIENDO, solo el primer DEFINIENDO puede no ser decla-
+rado  y  es el que da nombre a la pasta de DIDACMAX 2000 generado
+este puede ser de dos tipos:
+
+De texto:
+        DEFINIENDO |<nombre>| [|EN rengl¢n,columna|] [COLOR |marco|,
+        |texto|,| hipertextos|,|marcado|] [CLAVE <|clave de acceso|>]
+        .
+        .
+        [.P]
+        .
+        .
+        .FIN
+
+    .P  sirve para partir el texto en paginas
+    .FIN para terminar el DEFINIENDO
+
+.P
+
+
+De llamado:
+
+
+
+        DEFINIENDO |<nombre>| COMANDO
+        [|programa| a evocar]
+        [|PAUSA| [<AVISO>]]
+
+.p
+
+
+Por ejemplo:
+DEFINIENDO [|LA FLOR|] EN 5,10 COLOR TBLANCO/FNEGRO,TAZULCIELO/FNEGRO,\\
+TVERDE/FNEGRO,TAZUL/FAZULCIELO CLAVE [HOLA]
+LA FLOR ES MUY BELLA
+\.P
+PERO TIENE ESPINAS
+\.FIN
+DEFINIENDO [|EXTERNAS|] COMANDO
+[IMAGEN FLOR]
+PAUSA "Pulse una tecla para continuar"
+REGRESANDO
+1 : "EL EDITOR DE TEXTOS"
+OTRO : "EL COMANDO DEFINIENDO"
+
+.FIN
+DEFINIENDO [LA FLOR] EN 5,10 COLOR TBLANCO/FNEGRO,TAZUL/FNEGRO,\
+TVERDE/FNEGRO,TAZUL/FAZULCIELO CLAVE [HOLA]
+LA FLOR ES MUY BELLA
+.P
+PERO TIENE ESPINAS
+.FIN
+DEFINIENDO [EXTERNAS] COMANDO
+[IMAGEN FLOR]
+PAUSA "Pulse una tecla para continuar"
+
+DEFINIENDO [EN rengl¢n,columna] EN -1,-1 COLOR TAZUL/FROJO,TAZUL/FROJO,,
+Es una par de n£meros separados por una coma, que
+indican, las coordenadas de el  ngulo superior
+izquierdo de la ventana a formar asi la notaci¢n
+EN 6,10 significa el rengl¢n 6 y la columna 10.
+Si se omite este par metro por defecto se asume
+1,1 si se utiliza -1, significa centrar as¡ 5,-1
+significa rengl¢n 5, centrar columnas, -1,10 cen-
+trar rengl¢n columna 10 y -1,-1 centrar rengl¢n y
+centrar columna.
+.fin
+DEFINIENDO [marco] EN -1,-1 COLOR TAZUL/FAZULCIELO,TNEGRO/FAZULCIELO,\
+TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+        El color del marco de la ventana se define con el
+para de |colores| del texto y del fondo del marco en esta
+ventana son TAZUL sobre FAZULCIELO.
+.fin
+DEFINIENDO [texto] EN -1,-1 COLOR TNEGRO/FAZULCIELO,TAZUL/FBLANCO,\
+TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+ El texto se define con el par de
+ |colores| de texto y fondo, en
+ esta ventana son TAZUL sobre
+ FAZULCIELO.
+.FIN
+DEFINIENDO [ hipertextos] EN -1,-1 COLOR TNEGRO/FAZULCIELO,TAMARILLO/FAZULCIELO,TAMARILLO/FCAFE,TROJO/FAZUL
+        Los colores de los hipertextos se definen con
+el par de |colores| del |hipertexto|, texto y fondo en
+esta ventana es TAMARILLO sobre FCAFE.
+.FIN
+DEFINIENDO [MARCADO] EN -1,-1 COLOR TNEGRO/FAZULCIELO,TAZUL/FCAFE,TAMARILLO/FCAFE,TROJO/FAZUL
+        El hipertexto a que apunta el cursos maneja el
+par de |colores| definidos en texto y fondo en esta
+ventana es TROJO sobre FAZUL
+.fin
+DEFINIENDO [colores] EN -1,-1 COLOR TNEGRO/FCAFE,TAZUL/FCAFE,TAMARILLO/FCAFE,TROJO/FCAFE
+        El formato del par de colores es Tnombre color/Fnombre color
+        donde los colores pueden ser:
+
+        T               F
+        NEGRO           NEGRO
+        BLANCO          BLANCO           POR EJEMPLO:
+        VERDE           VERDE
+        AZUL            AZUL             TNEGRO/FCAFE
+        AZULCIELO       AZULCIELO
+        CAFE            CAFE
+        ROJO            ROJO
+        AMARILLO
+.FIN
+DEFINIENDO [clave de acceso] EN -1,-1 COLOR TAZUL/FAZULCIELO,TAZUL/FAZULCIELO,TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+Esta opci¢n permite establecer claves de
+acceso  al  hipertexto  de tal forma que
+solo  aquel usuario que conozca la clave
+podr  tener acceso al servicio del mismo.
+
+Por ejemplo:   CLAVE "secreta"
+
+.fin
+defi [<nombre>] en -1,-1 color tamarillo/fcafe,tamarillo/fcafe,,
+Es el nombre que se le asigna a la ventana  y
+que coincide con la de uno o mas hipertextos.
+   Las mayusculas y minusculas no  establecen
+diferencia, asi como las vocales  asentuadas,
+y la ¤, ¥, con la N.
+.fin
+DEFI [PROGRAMA] EN 10,40 COLOR TAZUL/FCAFE,TAMARILLO/FCAFE,,
+Clave de evocaci¢n del programa
+que se requiere correr con sus
+par metros correspondientes;
+ejemplo:
+[123] "dir *.*" o
+[escolar "ciencia exactas"]
+.fin
+defi "PAUSA" en 14,5 color tamarillo/fazul,tblanco/fazul,,
+Solo aplicable en el definiendo comando
+genera una pausa antes del regreso del
+programa evocado, si se le indica marca
+un mensaje con la pausa.
+.fin
+defi [el comando tecla] en -1,-1 color tamarillo/fazulcielo,tnegro/fazulcielo,\
+trojo/fazulcielo,tamarillo/fazulcielo
+ TECLA <Nombre de tecla> A |<nombre>|[, <Nombre de tecla> A <nombre>]..
+ El nombre de tecla puede ser:
+
+ desde f1 a f12 de cntr+f1 a cntrl+f12 y de alt+f1 a alt+f12.
+
+    ejemplo:
+
+ en este manual esta cargado f1 con:
+ tecla f1 [ayuda] tecla f2 [calcula]
+ oprima f1 y despues f2.
+.fin
+defi [ayuda]
+TAB         Navegar entre hipertextos
+ENTER       Entrar a Hipertexto
+HOME o ESC  Salir a pantalla anterior
+            o de DIDACMAX 2000.
+PgDn        Avance p gina
+PgUp        Retrocede p gina
+.fin
+defi [calcula] coma
+[calcula]
+DEFINIENDO [Formando hipertextos] EN -1,-1 COLOR TAMARILLO/FAZULCIELO,TAMARILLO/FAZULCIELO,TAZUL/FAZULCIELO,TROJO/FAZULCIELO
+Dentro de cualquier comando DEFINIENDO de forma texto
+se pueden definir uno o varios hipertextos basta con
+encerrar entre las barras verticales (\|) la palabra
+o frase que se requiera, la palabra |hipertexto| esta
+encerrada entre \|.
+Por cada hipertexto generado deber  usar un comando
+DEFINIENDO, ya sea de texto o de llamado seg£n sea el
+caso.
+.fin
+DEFINIENDO [hipertexto] EN -1,-1 COLOR TAMARILLO/FROJO,TAMARILLO/FROJO,TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+Texto que encierra otro texto
+o una llamada a una utiler¡a o
+a un programa.
+.fin
+DEFINIENDO [Programas y utiler¡as] EN -1,-1 COLOR TNEGRO/FCAFE,\
+TAZUL/FCAFE,TAMARILLO/FCAFE,Tnegro/FCAFE
+DIDACMAX 2000, tiene la facultad que puede correr
+el programa que usted desee, tanto de los populares
+como, Lotus 123, Dbase, Synphony, Story Board, Etc.
+como programas que MICROMAX ha escrito para DIDACMAX
+2000, que hemos llamado UTILERIAS.
+Tanto los primeros como los segundos se evocan con el
+DEFININEDO comando, referido en |El comando definiendo|
+La lista de utilerias liberadas hasta el momento son:
+        |CALCULA |      |ESCOLAR|       |TAREAS|
+        |LETRERO|       |IMAGEN|        |ANIMA|
+        |GRAFICAS|      |DIRECTORIO|    |LETRAS|
+        |LEER|
+.FIN
+DEFINIENDO [CALCULA ] EN -1,-1 COLOR TAZUL/FAZULCIELO,TAZUL/FAZULCIELO,TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+        Es una calculadora que se evoca
+con el nombre CALCULA, no lleva par metros
+
+  DEFINIENDO [XXXXXX] COMANDO
+  "CALCULA"
+.FIN
+DEFINIENDO [ESCOLAR] EN -1,-1 COLOR TAZUL/FAZULCIELO,TAZUL/FAZULCIELO,TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+Permite aplicar una evaluaci¢n utilizando una base
+de datos generada por el programa |EXAMEN|, la base
+de datos debe tener cuando menos el n£mero de reac-
+tivos a aplicar, pero puede ser mayor los que le per-
+mite variar las preguntas cada vez que sea usada, el
+formato de ESCOLAR es:
+   ESCOLAR <archivo> <nombre de la materia> <reactivos-
+   a aplicar>
+
+        el archivo es el generado por |EXAMEN|
+
+        si el nombre de la materia lleva blancos o
+        comas debera entrecomillarse.
+
+        el n£mero de reactivos a aplicar, debe
+   ser menor o igual a los generados en EXAMEN y menor
+   a 1000.
+
+.p
+        Ejemplo:
+        DEFINIENDO [|ABC|] COMANDO
+        [ESCOLAR ESCOLAR.TXT "Prueba" 3]
+        Significa:
+La evaluaci¢n con el archivo ESCOLAR.TXT, 3 reactivos,
+con el t¡tulo "Prueba".
+Escolar genera un reporte encriptado del ex men realizado
+el nombre del archivo es id‚ntico al de la base de reac-
+tivos pero con la extenci¢n .REP, para consultarlo se usa
+el programa REPENC con formato REPENC <Archivo>.
+        DEFINIENDO [|CONSULTA DE ESCOLAR|] COMANDO
+        [REPENC ESCOLAR.REP]
+.FIN
+DEFINIENDO [ABC] COMANDO
+[ESCOLAR ESCOLAR.TXT "Prueba" 3]
+DEFINIENDO [CONSULTA DE ESCOLAR] COMANDO
+[REPENC ESCOLAR.REP]
+DEFINIENDO [EXAMEN] EN -1,-1 COLOR TCAFE/FBLANCO,TCAFE/FBLANCO,TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+Este programa comunmente se usa fuera de DIDACMAX 2000
+y sirve para generar bases de datos para las evaluaciones
+de ESCOLAR, simplemente se evoca desde DOS con EXAMEN,
+contiene cometarios suficientes para que se autoexplique
+para su uso.
+
+Se evoca: EXAMEN <archivo>
+
+Si el archivo existe lo actualiza, de lo contrario lo
+crea.
+.fin
+DEFINIENDO [TAREAS] EN -1,-1 COLOR TAZUL/FAZULCIELO,TAZUL/FAZULCIELO,TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+Permite aplicar una evaluaci¢n utilizando una base
+de datos generada por el programa |EXAMEN|, la base
+de datos debe tener cuando menos el n£mero de reac-
+tivos a aplicar, pero puede ser mayor los que le per-
+mite variar las preguntas cada vez que sea usada, el
+formato de TAREA es:
+   TAREA <archivo> <nombre de la materia> <reactivos-
+   a aplicar>
+
+        el archivo es el generado por |EXAMEN|
+
+        si el nombre de la materia lleva blancos o
+        comas debera entrecomillarse.
+
+        el n£mero de reactivos a aplicar, debe
+   ser menor o igual a los generados en EXAMEN y menor
+   a 1000.
+
+.p
+        Ejemplo:
+        DEFINIENDO [|UNA TAREA|] COMANDO
+        [TAREA ESCOLAR.TXT "DIDACMAX" 3]
+        Significa:
+La tarea con el archivo ESCOLAR.TXT, 3 reactivos,
+con el t¡tulo DIDACMAX.
+Tarea genera un reporte encriptado de la tera realizada
+el nombre del archivo es id‚ntico al de la base de reac-
+tivos pero con la extenci¢n .REP, para consultarlo se usa
+el programa REPENC con formato REPENC <Archivo>.
+        DEFINIENDO [|CONSULTA DE TAREA|] COMANDO
+        [REPENC ESCOLAR.REP]
+.FIN
+DEFINIENDO [UNA TAREA] COMANDO
+[TAREA ESCOLAR.TXT "DIDACMAX" 3]
+DEFINIENDO [CONSULTA DE TAREA] COMANDO
+[REPENC ESCOLAR.REP]
+DEFINIENDO [LETRERO] EN -1,-1 COLOR TAZUL/FAZULCIELO,TAZUL/FAZULCIELO,TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+Sirve para generar un letreto en modo gr fico tan
+grande como el largo del texto y el tipo de monitor
+lo permite su formato es:
+
+      LETRERO <mensaje> <color letras>
+
+      <mensaje> es el mensaje a mostrar.
+
+       los colores son:
+       0 negro       6 caf‚           12 rosa
+       1 azul        7 gris claro     13 magenta claro
+       2 verde       8 gris obscuro   14 amarillo
+       3 cyan        9 azul claro     15 blanco
+       4 rojo        10 verde claro
+       5 magenta     11 cyan claro
+
+        ejemplo:
+
+        DEFINIENDO [|ABCD|] COMANDO
+        [LETRERO "HOLA AMIGOS" 10]
+.FIN
+DEFINIENDO [ABCD] COMANDO
+[LETRERO "HOLA AMIGOS" 10]
+DEFINIENDO [IMAGEN] EN -1,-1 COLOR TAZUL/FAZULCIELO,TAZUL/FAZULCIELO,TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+Muestra imagenes generadas en alg£n programa
+como PAINTSHOW, PAINTBRUSH, PAGEMAKER,
+WORDPERFECT 5.0, FINESSE Y WORD 5.0
+(Solo Blanco y Negro). en formato .TIF,
+se requiere generar un archivo ascii con
+la lista de imagenes a mostrar, el formato
+de cada linea de la listas es:
+        <nombre de archivo>.TIF <tiempo>
+
+ Donde <nombre de archivo> es el nombre del
+ archivo formato TIF y <tiempo> es tiempo de
+        exposici¢n en segundos.
+
+El formato de llamado al programa es:
+
+        IMAGEN <archivo de imagenes>
+
+<archivo de imagenes> es el nombre del archivo
+asccii que contiene la lista de imagenes.
+.p
+        Ejemplo:
+
+        DEFINIENDO [|EXTERNAS|] COMANDO
+        [IMAGEN FLOR]
+
+
+       TYPE FLOR
+       FLOR.TIF 1
+.FIN
+DEFINIENDO [GRAFICAS] EN -1,-1 COLOR TAZUL/FAZULCIELO,TAZUL/FAZULCIELO,\
+TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+
+
+Este programa produce graficas a partir de un archivo ascii
+con el formato siguiente:
+Existen tres utilerias para graficar, estas producen gr ficas
+de Pie, Gr ficas de Barra y Gr ficas de Lineas, se evocan con
+|GRAFPIE|, |GRAFBAR| y |GRAFLIN|, respectivamente.
+
+
+.fin
+defi [grafpie] en -1,-1 colo Tnegro/fblanco,tnegro/fblanco,tazul/fblanco,\
+trojo/fazulcielo
+La gr fica se produce con base a un archivo ASCII con el
+formato:
+
+Primer linea:      <Nombre de la Gr fica>
+Segunda Linea:     <dato 1>, <dato 2>, .....<dato n>*
+Tercera Linea:     <nombre 1>, <nombre 2>,.....<nombre n>
+
+ * m ximo 12 datos.
+
+ Vea |ejemplo de Archivo de Gr fica de Pie|
+
+Para evovar el programa se teclea:
+
+ GRAFPIE <Archivo de Datos>
+
+ Vea |ejemplo de Gr fica de Pie|
+.fin
+defi [ejemplo de Archivo de Gr fica de Pie] coma
+[leer ventas.pie]
+defi [ejemplo de Gr fica de Pie] coma
+[grafpie ventas.pie]
+defi [grafbar] en -1,-1 colo Tnegro/fblanco,tnegro/fblanco,tazul/fblanco,\
+trojo/fazulcielo
+La gr fica se produce con base a un archivo ASCII con el
+formato:
+
+Primer linea:      <Nombre de la Gr fica>
+Segunda linea:     <Nombre en X>
+Tercer linea:      <Nombre en Y>
+Cuarta Linea:     <dato 1>, <dato 2>, .....<dato n>*
+Quinta Linea:     <nombre 1>, <nombre 2>,.....<nombre n>
+
+ * m ximo 12 datos.
+
+ Vea |ejemplo de Archivo de Gr fica de Barra|
+
+Para evovar el programa se teclea:
+
+ GRAFBAR <Archivo de Datos>
+
+ Vea |ejemplo de Gr fica de Barra|
+.fin
+defi [ejemplo de Archivo de Gr fica de Barra] coma
+[leer ventas.bar]
+defi [ejemplo de Gr fica de Barra] coma
+[grafbar ventas.bar]
+defi [graflin] en -1,-1 colo Tnegro/fblanco,tnegro/fblanco,tazul/fblanco,\
+trojo/fazulcielo
+La gr fica se produce con base a un archivo ASCII con el
+formato:
+
+Primer rengl¢n:  <Nombre de la Gr fica>
+Segundo rengl¢n: <Nombre en X>
+Tercer rengl¢n:  <Nombre en Y>
+Cuarto rengl¢n:  <nombre 1>,<nombre 2>,.....<nombre n>
+Quinto rengl¢n:  <linea 1>,<dato 1>,<dato 2>,..<dato n>* de la linea 1.
+Sexto rengl¢n:   <linea 2>,<dato 1>,<dato 2>,..<dato n> de la linea 2.
+   .
+   .
+N rengl¢n:       <linea n>,<dato 1>, <dato 2>,.<dato n> de la linea n**.
+ * m ximo 12 datos.
+ ** m ximo 10 lineas.
+ Vea |ejemplo de Archivo de Gr fica de Linea|
+
+Para evovar el programa se teclea:
+
+ GRAFLIN <Archivo de Datos>
+ Vea |ejemplo de Gr fica de Linea|
+.fin
+defi [ejemplo de Archivo de Gr fica de Linea] coma
+[leer ventas.lin]
+defi [ejemplo de Gr fica de Linea] coma
+[graflin ventas.lin]
+DEFINIENDO [ANIMA] EN -1,-1 COLOR TAZUL/FAZULCIELO,TAZUL/FAZULCIELO,TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+        La simulaci¢n de animaci¢n se logra
+con el programa AMINA, que es una secuencia de
+imagenes elaborada con alg£n programa de dibujo
+capaz de generar archivos .TIF, como son:
+PaintShow, Paintshow Plus, PageMaker, WordPerfect
+5.0, Finesse y Word 5.0 (Solo Blanco y negro).
+se requiere generar un archivo ascii con
+la lista de imagenes a mostrar, el formato
+de cada linea de la listas es:
+        nnnnnnnn.TIF t
+
+        Donde nnnnnnnn es el nombre del
+        archivo TIF y t es tiempo de
+        exposici¢n en d‚cimas de segundos.
+.P
+El formato de llamado al programa es:
+
+        ANIMA aaaaaaaa
+
+        aaaaaaaa es el nombre del archivo
+        asccii que contiene la lista de
+        imagenes.
+
+        Ejemplo:
+
+        DEFINIENDO [ABC] CAMANDO
+        [ANIMA MARCHA]
+
+
+       TYPE MARCHA
+       MARCHA1.TIF 10
+       MARCHA2.TIF 10
+       MARCHA3.TIF 10
+.FIN
+DEFINIENDO [DIRECTORIO] EN -1,-1 COLOR TAZUL/FAZULCIELO,TAZUL/FAZULCIELO,TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+        Desarrollado en CLIPPER, directorio permite la
+integraci¢n de un directorio telef¢nico capaz de orga-
+nizar los registros, por roden alfab‚tico de nombre,o de
+empresa, Puede imprimir el directorio en cualquiera de
+estos ¢rdenes.
+        Su formato es:
+
+        DIREC
+
+        ejemplo:
+
+        DEFINIENDO [ABC] COMANDO
+        [DIREC]
+.fin
+DEFI [LETRAS] EN -1,-1 COLOR TAMARILLO/FVERDE,TAMARILLO/FVERDE,,
+Con formato LETRAS <mensaje> <columna> <rengl¢n> <color texto>
+<color fondo>
+genera letreros grandes en forma texto, con un dilatador
+durante la escritura,
+Si el mensaje tiene espacio y/o comas tiene que entrecomillarse
+el renglon puede ser de 1 a 17, e la columna de 1 a 72.
+los colores son:
+        0 negro       6 caf‚           12 rosa
+        1 azul        7 gris claro     13 magenta claro
+        2 verde       8 gris obscuro   14 amarillo
+        3 cyan        9 azul claro     15 blanco
+        4 rojo        10 verde claro
+        5 magenta     11 cyan claro
+
+ejemplo
+DEFINIENDO [|BIEN|] COMANDO
+[LETRAS "BIEN " 20 10 11 3]
+PAUSA [UNA TECLA PARA REGRESAR]
+
+.fin
+DEFINIENDO [BIEN] COMANDO
+[LETRAS "BIEN " 20 10 11 3]
+PAUSA [UNA TECLA PARA REGRESAR]
+
+DEFI [LEER] EN -1,-1 COLO TROJO/FAZULCIELO,TNEGRO/FAZULCIELO,,
+Esta utiler¡a, le permite leer cualquier archivo
+en formato ASCII su formato es:
+
+                LEER <archivo>
+
+        <archivo> es al archivo a leer.
+
+ejemplo:
+        DEFINIENDO [|VER|] COMANDO
+        [LEER MANUAL.DOC]
+.FIN
+DEFINIENDO [VER] COMANDO
+[LEER MANUAL.DOC]
+DEFINIENDO [Caracteres especiales] EN -1,-1 COLOR TNEGRO/FCAFE,TAZUL/FCAFE,TAMARILLO/FCAFE,TROJO/FCAFE
+En DIDACMAX 2000, existen caracteres especiales que
+NO se pueden usar libremente dentro de ningun texto
+ya que son caracteares de control de DIDACMAX, estos
+son:
+
+        \\,\| y . (cuando est  en la primer columna)
+
+        para poder usar los mismos como se ha hecho
+        en este texto, anteponga el caracter \\ , mismo
+        que no aparecer  en el resultado final pero per-
+        mite que el caracter prohibido si aparesca.
+.fin
+DEFINIENDO [La compilaci¢n] EN -1,-1 COLOR TNEGRO/FCAFE,TAZUL/FCAFE,TAMARILLO/FCAFE,TROJO/FCAFE
+ Para compilar un documento, solo requiere
+ teclear AYUDA <AAAAAAA.AAA> [<BBBBBBBB.BBB>]
+ donde:
+
+ AAAAAAAA.AAA es el archivo fuente y
+ BBBBBBBB.BBB
+ es el archivo aprovechable por el "Run Time"
+ de DIDACMAX.
+
+ En aucencia de extenci¢n en AAAAAAAA.AAA,
+ asume .CUR y en aucencia de BBBBBBBB.BBB
+ asume DIDAC.OUT
+
+ Para correr el archivo aprovechable, tecle‚
+
+ ADMIN BBBBBBBB.BBB
+
+ El run time se puede renombrar en caso necesario.
+
+.fin
+defi [ejemplo de c¢digo] en -1,-1 colo tamarillo/fverde,tamarillo/fverde,\
+tazul/fverde,trojo/fverde
+Hemos escogido como ejemplo el propio c¢digo
+de este manual, esta en el hipertexto llamado
+|ver|.
+.fin

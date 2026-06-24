@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -16,6 +15,9 @@ import { EvaluacionModule } from './evaluacion/evaluacion.module';
 import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { loadLocalEnvFiles } from './load-env';
+
+loadLocalEnvFiles();
 
 @Module({
   imports: [
@@ -65,8 +67,8 @@ import { AppService } from './app.service';
       autoSchemaFile:
         process.env.NODE_ENV === 'production' ? true : join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
-      playground: true,
-      introspection: true,
+      playground: process.env.NODE_ENV !== 'production',
+      introspection: process.env.NODE_ENV !== 'production',
       context: ({ req }) => ({ req }),
     }),
   ],

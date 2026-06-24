@@ -165,10 +165,11 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="login-email" className="block text-sm font-semibold text-gray-700 mb-2">
                   Correo Electrónico
                 </label>
                 <input
+                  id="login-email"
                   type="email"
                   name="email"
                   value={formData.email}
@@ -180,11 +181,12 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="login-password" className="block text-sm font-semibold text-gray-700 mb-2">
                   Contraseña
                 </label>
                 <div className="relative">
                   <input
+                    id="login-password"
                     type={showPassword ? "text" : "password"}
                     name="password"
                     value={formData.password}
@@ -195,6 +197,7 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
                   />
                   <button
                     type="button"
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   >
@@ -261,10 +264,11 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
 
             <form onSubmit={handleSolicitarCodigo} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="recovery-email" className="block text-sm font-semibold text-gray-700 mb-2">
                   Correo Electrónico
                 </label>
                 <input
+                  id="recovery-email"
                   type="email"
                   value={recoveryEmail}
                   onChange={(e) => setRecoveryEmail(e.target.value)}
@@ -309,10 +313,11 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
 
             <form onSubmit={handleRestablecerPassword} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="recovery-code" className="block text-sm font-semibold text-gray-700 mb-2">
                   Código de 6 dígitos
                 </label>
                 <input
+                  id="recovery-code"
                   type="text"
                   maxLength={6}
                   value={recoveryCode}
@@ -324,11 +329,12 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="recovery-password" className="block text-sm font-semibold text-gray-700 mb-2">
                   Nueva Contraseña
                 </label>
                 <div className="relative">
                   <input
+                    id="recovery-password"
                     type={showPassword ? "text" : "password"}
                     value={newRecoveryPassword}
                     onChange={(e) => setNewRecoveryPassword(e.target.value)}
@@ -338,6 +344,7 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
                   />
                   <button
                     type="button"
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   >

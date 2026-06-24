@@ -63,6 +63,13 @@ const AdminDashboard = ({ usuario, onNavigate, onLogout }) => {
     setSuccess('');
     
     try {
+      if (!draft.id && (!draft.password || draft.password.length < 6)) {
+        throw new Error('La contraseña temporal debe tener al menos 6 caracteres.');
+      }
+      if (draft.password && draft.password.length < 6) {
+        throw new Error('La contraseña debe tener al menos 6 caracteres.');
+      }
+
       const payload = {
         id: Number(draft.id),
         nombre: draft.nombre.trim(),
@@ -432,8 +439,16 @@ const AdminDashboard = ({ usuario, onNavigate, onLogout }) => {
                                   type="button"
                                   onClick={async () => {
                                     if (window.confirm(`¿Estás seguro de eliminar a ${item.nombre}?`)) {
-                                      await eliminarUsuario(item.id);
-                                      await cargarUsuarios();
+                                      try {
+                                        setError('');
+                                        await eliminarUsuario(item.id);
+                                        await cargarUsuarios();
+                                        setSuccess('Usuario eliminado con éxito.');
+                                      } catch (deleteError) {
+                                        setError(
+                                          deleteError.message || 'No fue posible eliminar el usuario.',
+                                        );
+                                      }
                                     }
                                   }}
                                   className="text-red-600 hover:text-red-800 transition flex items-center gap-1"

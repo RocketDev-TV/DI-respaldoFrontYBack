@@ -7,6 +7,7 @@ const courses = [
 ];
 
 const generalPages = [
+  { name: 'Descargas', icon: 'download' },
   { name: 'Contacto', icon: 'mail' },
   { name: 'Presentaciones', icon: 'presentation' },
   { name: 'Sobre Mi', icon: 'user' },
@@ -17,6 +18,10 @@ const authPages = [
   { name: 'Registrarse', icon: 'user-plus' },
   { name: 'Iniciar Sesión', icon: 'log-in' },
 ];
+
+const publicGeneralPages = generalPages.filter(
+  (page) => page.name !== 'Descargas' && page.name !== 'Presentaciones',
+);
 
 const VISTAS_PANEL = {
   alumno: 'Panel del Alumno',
@@ -126,7 +131,7 @@ const Sidebar = ({
                 General
               </div>
               {renderNavItems(
-                generalPages,
+                publicGeneralPages,
                 currentView,
                 handleNavigation,
                 'bg-gray-900 border-l-4 border-[#6b2132] text-white',

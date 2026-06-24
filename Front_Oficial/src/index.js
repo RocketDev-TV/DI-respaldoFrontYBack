@@ -2,13 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import { getGraphqlApiUrl } from './services/apiConfig';
 
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client/core';
 import { ApolloProvider } from '@apollo/client/react';
+import { getGraphqlApiUrl } from './services/apiConfig';
 
 const client = new ApolloClient({
-  link: new HttpLink({ uri: getGraphqlApiUrl() }), // Llama a la función aquí
+  link: new HttpLink({ uri: getGraphqlApiUrl() }),
   cache: new InMemoryCache(),
 });
 

@@ -81,6 +81,8 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   readonly entrega = {
     findMany: async (args?: QueryArgs) => this.findEntregas(args?.where),
     upsert: async ({ data }: QueryArgs) => this.upsertEntrega(data),
+    delete: async ({ where }: QueryArgs) =>
+      this.deleteEntrega(Number(where?.alumnoId), Number(where?.asignacionId)),
   };
 
   readonly calificacionAsignacion = {
@@ -313,8 +315,8 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
             `
               SELECT DISTINCT u.id, u.nombre
               FROM "Unidad" u
-              INNER JOIN "Contenido" c ON c."unidadId" = u.id
-              WHERE c."tipoMateria" = $1
+              LEFT JOIN "Contenido" c ON c."unidadId" = u.id
+              WHERE c."tipoMateria" = $1 OR c.id IS NULL
               ORDER BY u.id ASC
             `,
             [tipoMateria],
@@ -750,7 +752,8 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     const whereClause = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
     return this.queryRows(
       `
-        SELECT id, "asignacionId", "alumnoId", grupo, parcial, "nombreArchivo", "mimeType", tamano, "archivoBase64", estado, "fechaEntrega"
+        SELECT id, "asignacionId", "alumnoId", grupo, parcial, "nombreArchivo", "mimeType", tamano,
+               "archivoBase64", estado, "fechaEntrega" AS "entregadoEn"
         FROM "Entrega"
         ${whereClause}
         ORDER BY "fechaEntrega" DESC, id DESC
@@ -773,7 +776,8 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
           "archivoBase64" = EXCLUDED."archivoBase64",
           estado = 'entregado',
           "fechaEntrega" = NOW()
-        RETURNING id, "asignacionId", "alumnoId", grupo, parcial, "nombreArchivo", "mimeType", tamano, "archivoBase64", estado, "fechaEntrega"
+        RETURNING id, "asignacionId", "alumnoId", grupo, parcial, "nombreArchivo", "mimeType", tamano,
+                  "archivoBase64", estado, "fechaEntrega" AS "entregadoEn"
       `,
       [
         data?.asignacionId,
@@ -785,6 +789,17 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
         data?.tamano ?? 0,
         data?.archivoBase64,
       ],
+    );
+  }
+
+  private async deleteEntrega(alumnoId: number, asignacionId: number) {
+    return this.queryOne(
+      `
+        DELETE FROM "Entrega"
+        WHERE "alumnoId" = $1 AND "asignacionId" = $2
+        RETURNING id
+      `,
+      [alumnoId, asignacionId],
     );
   }
 
@@ -890,13 +905,15 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
       );
     }
 
-    if (!existsSync('.env')) {
+    const envFile = ['.env', 'env'].find((fileName) => existsSync(fileName));
+
+    if (!envFile) {
       throw new Error(
         'DATABASE_URL no esta configurada. Define DATABASE_URL en tu entorno local o en un archivo .env.',
       );
     }
 
-    const env = readFileSync('.env', 'utf8');
+    const env = readFileSync(envFile, 'utf8');
     const envDatabaseUrl = env.match(/DATABASE_URL="?([^"\n]+)"?/)?.[1]?.trim();
 
     if (envDatabaseUrl) {
@@ -1020,6 +1037,22 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     `);
 
     await this.pool.query(`
+      ALTER TABLE "Entrega" ADD COLUMN IF NOT EXISTS grupo TEXT NOT NULL DEFAULT '';
+      ALTER TABLE "Entrega" ADD COLUMN IF NOT EXISTS parcial INTEGER NOT NULL DEFAULT 1;
+    `).catch(() => {});
+
+    await this.pool.query(`
+      ALTER TABLE "CalificacionAsignacion" ADD COLUMN IF NOT EXISTS grupo TEXT NOT NULL DEFAULT '';
+      ALTER TABLE "CalificacionAsignacion" ADD COLUMN IF NOT EXISTS parcial INTEGER NOT NULL DEFAULT 1;
+    `).catch(() => {});
+
+    await this.pool.query(`
+      ALTER TABLE "Entrega" ADD COLUMN IF NOT EXISTS grupo TEXT NOT NULL DEFAULT '';
+      ALTER TABLE "Entrega" ADD COLUMN IF NOT EXISTS parcial INTEGER NOT NULL DEFAULT 1;
+      ALTER TABLE "Entrega" ADD COLUMN IF NOT EXISTS "fechaEntrega" TIMESTAMPTZ NOT NULL DEFAULT NOW();
+    `).catch(() => {});
+
+    await this.pool.query(`
       CREATE TABLE IF NOT EXISTS "CalificacionAsignacion" (
         id SERIAL PRIMARY KEY,
         "asignacionId" INTEGER NOT NULL REFERENCES "Asignacion"(id) ON DELETE CASCADE,
@@ -1043,6 +1076,31 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
       );
       CREATE INDEX IF NOT EXISTS "VerificationCode_alumnoId_idx" ON "VerificationCode"("alumnoId");
     `);
+
+    await this.pool.query(`
+      ALTER TABLE "Entrega" ADD CONSTRAINT "unique_alumno_asignacion" UNIQUE ("alumnoId", "asignacionId");
+    `).catch(() => {});
+
+    await this.pool.query(`
+      ALTER TABLE "Entrega" ADD CONSTRAINT "unique_asignacion_alumno_parcial" UNIQUE ("asignacionId", "alumnoId", parcial);
+    `).catch(() => {});
+
+    await this.pool.query(`
+      ALTER TABLE "Contenido" DROP CONSTRAINT IF EXISTS "Contenido_unidadId_fkey";
+      ALTER TABLE "Contenido" ADD CONSTRAINT "Contenido_unidadId_fkey" FOREIGN KEY ("unidadId") REFERENCES "Unidad"("id") ON DELETE CASCADE;
+
+      ALTER TABLE "Asignacion" DROP CONSTRAINT IF EXISTS "Asignacion_contenidoId_fkey";
+      ALTER TABLE "Asignacion" ADD CONSTRAINT "Asignacion_contenidoId_fkey" FOREIGN KEY ("contenidoId") REFERENCES "Contenido"("id") ON DELETE CASCADE;
+
+      ALTER TABLE "Entrega" DROP CONSTRAINT IF EXISTS "Entrega_asignacionId_fkey";
+      ALTER TABLE "Entrega" ADD CONSTRAINT "Entrega_asignacionId_fkey" FOREIGN KEY ("asignacionId") REFERENCES "Asignacion"("id") ON DELETE CASCADE;
+
+      ALTER TABLE "Video" DROP CONSTRAINT IF EXISTS "Video_contenidoId_fkey";
+      ALTER TABLE "Video" ADD CONSTRAINT "Video_contenidoId_fkey" FOREIGN KEY ("contenidoId") REFERENCES "Contenido"("id") ON DELETE CASCADE;
+      
+      ALTER TABLE "CalificacionAsignacion" DROP CONSTRAINT IF EXISTS "CalificacionAsignacion_asignacionId_fkey";
+      ALTER TABLE "CalificacionAsignacion" ADD CONSTRAINT "CalificacionAsignacion_asignacionId_fkey" FOREIGN KEY ("asignacionId") REFERENCES "Asignacion"("id") ON DELETE CASCADE;
+    `).catch(() => {});
   }
 
   private async ensureDefaultUsuarios() {

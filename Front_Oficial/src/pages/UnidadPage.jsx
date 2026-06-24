@@ -201,8 +201,6 @@ const TextoBloque = ({ texto }) => {
                     )}
                     <ol className="space-y-2.5 list-none">
                         {listLines.map((item, li) => {
-                            const colonIdx = item.indexOf(':');
-                            const hasTerm = colonIdx > 0 && colonIdx < 40 && /\*\*/.test(item.slice(0, colonIdx + 1));
                             return (
                                 <li key={li} className="flex gap-3 items-start bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-100">
                                     <span className="shrink-0 w-6 h-6 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center mt-0.5">
@@ -218,7 +216,7 @@ const TextoBloque = ({ texto }) => {
         }
 
         // ── Bullets Markdown (- item) o estilo original (• – \t) ─────────────
-        const isMarkdownBullet = /^[\-\*] /.test(trimmed) || trimmed.split('\n').some(l => /^[\-\*] /.test(l.trim()));
+        const isMarkdownBullet = /^[-*] /.test(trimmed) || trimmed.split('\n').some(l => /^[-*] /.test(l.trim()));
         if (isMarkdownBullet || hasBullets(trimmed)) {
             const lines = trimmed.split('\n').filter(Boolean);
             const titleLines = [];
@@ -226,12 +224,12 @@ const TextoBloque = ({ texto }) => {
             let inBullets = false;
 
             lines.forEach(line => {
-                const isMdBullet = /^[\-\*] /.test(line.trim());
-                const isOldBullet = /^[\t ]*[•\-–]/.test(line) || (/^\t/.test(line) && inBullets);
+                const isMdBullet = /^[-*] /.test(line.trim());
+                const isOldBullet = /^[\t ]*[•–-]/.test(line) || (/^\t/.test(line) && inBullets);
                 if (isMdBullet || isOldBullet) {
                     inBullets = true;
                     bulletLines.push(
-                        line.replace(/^[\-\*] /, '').replace(/^[\t ]*[•\-–]\s*/, '').replace(/^\t/, '').trim()
+                        line.replace(/^[-*] /, '').replace(/^[\t ]*[•–-]\s*/, '').replace(/^\t/, '').trim()
                     );
                 } else if (!inBullets) {
                     titleLines.push(line.trim());

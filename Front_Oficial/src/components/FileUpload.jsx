@@ -1,7 +1,11 @@
 // components/FileUpload.jsx
 import React, { useState, useRef, useEffect } from 'react';
+import {
+  MAX_DELIVERY_FILE_SIZE_BYTES,
+  validateDeliveryFile,
+} from '../utils/fileValidation';
 
-const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
+export const MAX_FILE_SIZE_BYTES = MAX_DELIVERY_FILE_SIZE_BYTES;
 
 const FileUpload = ({ onFileSelect, actividadId, onSubmit }) => {
   const [archivo, setArchivo] = useState(null);
@@ -31,25 +35,9 @@ const FileUpload = ({ onFileSelect, actividadId, onSubmit }) => {
   const validarYAsignarArchivo = (file) => {
     if (!file) return;
 
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      alert('El archivo es demasiado grande (máximo 8 MB para entrega en plataforma)');
-      return;
-    }
-
-    const tiposPermitidos = [
-      'application/pdf', 
-      'application/msword', 
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
-      'application/vnd.ms-excel', 
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
-      'application/zip', 
-      'text/plain', 
-      'image/jpeg', 
-      'image/png'
-    ];
-    
-    if (!tiposPermitidos.includes(file.type)) {
-      alert('Tipo de archivo no permitido. Tipos válidos: PDF, Word, Excel, ZIP, TXT, JPG, PNG');
+    const validationError = validateDeliveryFile(file);
+    if (validationError) {
+      alert(validationError);
       return;
     }
 

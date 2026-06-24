@@ -1,0 +1,41 @@
+DEFINIENDO [Wiiiiiii !!!] EN 10,10  COLOR TAZUL/FAZULCIELO,TAMARILLO/FAZULCIELO,\
+TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+Elaborado por
+	 Rivas Servin Jose Carlos
+
+|Caracteristicas de los lenguajes de programacion|
+|Mitos relacionados con el disenio de compiladores|
+|Aspectos comerciales y desarrollo de la Ing. De software|
+.FIN
+DEFINIENDO[Caracteristicas de los lenguajes de programacion] COLOR TAZUL/FAZULCIELO,TAMARILLO/FAZULCIELO,\
+TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+
+
+Legibilidad.- sencillez, claridad y uniformidad
+Compilabilidad .- rapida interpretacion , traduccion y generacion de codigo
+Ortogonalidad .- abstraccion y naturalidad (evitar la sobre carga)
+Integridad.-  conceptual que involucra modularidad y minimalidad
+Portabilidad
+Compatibilidad
+Prevision de errores
+.fin
+DEFINIENDO[Mitos relacionados con el disenio de compiladores]  COLOR TAZUL/FAZULCIELO,TAMARILLO/FAZULCIELO,\
+TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+
+1) Que la teoria de la computacion no se aplica a los compiladores.
+2) No se aplica a sistemas administrativos por que sale mas caro implementarlos
+3) Es un tema de exclusivo de catedraticos y experto
+4) Es complejo y no da ganancias
+.FIN
+DEFINIENDO[Aspectos comerciales y desarrollo de la Ing. De software] COLOR TAZUL/FAZULCIELO,TAMARILLO/FAZULCIELO,\
+TAMARILLO/FAZULCIELO,TROJO/FAZULCIELO
+1) Requerimientos: costos y beneficios 
+2) Licencias
+3) Capacitacion
+4) Documentacion 
+5) Soporte tecnico
+6) Contratos 
+7) Costos indirectos
+.FIN
+
+

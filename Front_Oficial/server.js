@@ -13,7 +13,7 @@ const host = process.env.HOST || (isProduction ? '0.0.0.0' : '127.0.0.1');
 const buildDir = path.join(__dirname, 'build');
 
 const databaseUrl = getDatabaseUrl();
-const pool = new Pool(buildPoolConfig(databaseUrl));
+const pool = databaseUrl ? new Pool(buildPoolConfig(databaseUrl)) : null;
 
 let schemaReadyPromise = null;
 
@@ -29,10 +29,19 @@ const mimeTypes = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.svg': 'image/svg+xml',
+  '.tif': 'image/tiff',
+  '.tiff': 'image/tiff',
   '.txt': 'text/plain; charset=utf-8',
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
   '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  '.exe': 'application/vnd.microsoft.portable-executable',
+  '.bat': 'application/octet-stream',
+  '.bgi': 'application/octet-stream',
+  '.cur': 'application/octet-stream',
+  '.out': 'application/octet-stream',
+  '.mht': 'multipart/related',
 };
 
 const server = http.createServer(async (req, res) => {
@@ -106,7 +115,8 @@ async function fetchUnidadesPorMateria(tipoMateria) {
     throw new Error('tipoMateria es requerido.');
   }
 
-  const unidadesResult = await pool.query(
+  const database = requirePool();
+  const unidadesResult = await database.query(
     `
       SELECT DISTINCT u.id, u.nombre
       FROM "Unidad" u
@@ -117,7 +127,7 @@ async function fetchUnidadesPorMateria(tipoMateria) {
     [tipoMateria],
   );
 
-  const contenidosResult = await pool.query(
+  const contenidosResult = await database.query(
     `
       SELECT
         id,
@@ -163,7 +173,7 @@ async function iniciarSesion(datos) {
     throw new Error('Correo y contrasena son requeridos.');
   }
 
-  const result = await pool.query(
+  const result = await requirePool().query(
     `
       SELECT id, nombre, apellido, email, grupo, password
       FROM "Alumno"
@@ -192,7 +202,8 @@ async function crearAlumno(datos) {
     throw new Error('Todos los campos son requeridos.');
   }
 
-  const existing = await pool.query('SELECT id FROM "Alumno" WHERE LOWER(email) = $1 LIMIT 1', [
+  const database = requirePool();
+  const existing = await database.query('SELECT id FROM "Alumno" WHERE LOWER(email) = $1 LIMIT 1', [
     email,
   ]);
 
@@ -200,7 +211,7 @@ async function crearAlumno(datos) {
     throw new Error('Ya existe una cuenta registrada con ese correo.');
   }
 
-  const created = await pool.query(
+  const created = await database.query(
     `
       INSERT INTO "Alumno" (nombre, apellido, email, grupo, password)
       VALUES ($1, $2, $3, $4, $5)
@@ -224,7 +235,7 @@ function sanitizeAlumno(alumno) {
 
 async function ensureSchema() {
   if (!schemaReadyPromise) {
-    schemaReadyPromise = pool.query(`
+    schemaReadyPromise = requirePool().query(`
       ALTER TABLE "Alumno"
       ADD COLUMN IF NOT EXISTS apellido TEXT NOT NULL DEFAULT '',
       ADD COLUMN IF NOT EXISTS grupo TEXT NOT NULL DEFAULT '',
@@ -247,13 +258,17 @@ function buildPoolConfig(connectionString) {
 
 function getDatabaseUrl() {
   const databaseUrl = process.env.DATABASE_URL?.trim();
-  if (!databaseUrl) {
+  return databaseUrl || null;
+}
+
+function requirePool() {
+  if (!pool) {
     throw new Error(
-      'DATABASE_URL no esta configurada. Define la variable en compiladores/.env o en tu entorno.',
+      'El API prototipo requiere DATABASE_URL. Configura el frontend para usar el backend GraphQL externo o define una base local.',
     );
   }
 
-  return databaseUrl;
+  return pool;
 }
 
 function loadPgModule() {
@@ -265,7 +280,7 @@ function loadPgModule() {
 }
 
 function loadEnvFiles() {
-  const envFiles = ['.env', '.env.local'];
+  const envFiles = ['.env', '.env.local', 'env.local'];
 
   for (const file of envFiles) {
     const filePath = path.join(__dirname, file);
@@ -343,7 +358,15 @@ function readJsonBody(req) {
 }
 
 async function tryServeStatic(requestPath, res) {
-  const normalizedPath = requestPath === '/' ? '/index.html' : requestPath;
+  let decodedPath;
+
+  try {
+    decodedPath = decodeURIComponent(requestPath);
+  } catch (_error) {
+    return false;
+  }
+
+  const normalizedPath = decodedPath === '/' ? '/index.html' : decodedPath;
   const safePath = path.normalize(normalizedPath).replace(/^(\.\.[/\\])+/, '');
   const filePath = path.join(buildDir, safePath);
 

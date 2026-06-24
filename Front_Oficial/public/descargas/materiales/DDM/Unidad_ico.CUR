@@ -1,0 +1,125 @@
+From: <Guardado por Windows Internet Explorer 8>
+Subject: 
+Date: Mon, 19 Sep 2011 13:51:52 -0500
+MIME-Version: 1.0
+Content-Type: text/html;
+	charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://mail.ipn.mx/Session/302619-qz88rpqW5c00lYpi9zKR-aoddozs/MessagePart/INBOX/5299-02-B/Unidad.CUR
+X-MimeOLE: Produced By Microsoft MimeOLE V6.00.2900.6109
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META content=3D"text/html; charset=3Dwindows-1252" =
+http-equiv=3DContent-Type>
+<META name=3DGENERATOR content=3D"MSHTML 8.00.6001.19120"></HEAD>
+<BODY><PRE>DEFINIENDO[COMPILADOR] en 10,15 COLOR =
+TAMARILLO/Frojo,TAMARILLO/Frojo,\
+TAZULCIELO/Frojo,TAZUL/FAZULCIELO
+
+4.1 |Concepto|
+4.2 |Proceso de interpretacion|
+4.3 |Proceso de compilacion|
+4.4 |Fases y componentes|
+4.5 |Analisis y sintesis|
+4.7 |Optimizacion de codigo|
+.Fin
+
+DEFINIENDO[Concepto] en 5,10
+Un compilador es un programa que recibe como=20
+entradaun programa escrito en un lenguaje X y=20
+deja otro programa escrito en un lenguaje Y.=20
+Un compilador es un traductor.
+.FIN
+
+DEFINIENDO[Proceso de interpretacion] en 5,10
+Genericamente hablando, en ciencias de la computacion, los procesadores=20
+de lenguajes son aquellos programas destinados a trabajar sobre una =
+entrada=20
+que, pertencen a un lenguaje en particular reconocido o  aceptado por el =
+
+programa en cuestion. Los procesadores de lenguajes se clasifican=20
+como |traductores| o |interpretes|.
+.FIN
+
+DEFINIENDO[traductores] en 3,7
+**Traductor: Programa que recibe una entrada escrita en un lenguaje (el =
+lenguaje fuente), a una salida
+ perteneciente a otro lenguaje (el lenguaje objeto), conservando su =
+siginificado.
+
+Clasificacion:
+	a) Compiladores
+	b) Ensambladores: Es el programa encargado de llevar a cabo un=20
+		                proceso denominado de ensamble o ensamblado.
+	c)Pre - procesadores
+.FIN
+
+DEFINIENDO[interpretes] en 3,7
+** Interprete: Obtiene los resultados conforme va analizando la entrada.
+.FIN
+
+
+DEFINIENDO[Proceso de compilacion] en 5,10
+Fases de un compilador:
+|Analisis|
+|Sintesis|
+.FIN
+
+DEFINIENDO[Analisis] en 3,7
+Paso 1.- Realiza el reconocimiento de caracteres para identificar que =
+las=20
+instrucciones que fueron introducidas esten lexica y sintacticamente de=20
+acuerdo al lenguaje de programacion. (SCANNER)
+Paso 2.- Realiza un manejo de errores y consulta a la tabla de simbolos=20
+para avisar que el usuario programador realice su correccion. (PARSING)
+Paso 3.- Realiza una traduccion o conversion de un codigo a otro cercano =
+
+a la maquina en la fase de sintesis.
+.FIN
+
+DEFINIENDO[Sintesis] en 3,7
+Generacion de codigo que puede ser intermedio o adecuado=20
+para que la maquine lo interprete y posteriormente lo ejecute=20
+cuando el usuario lo invoque.
+.FIN
+
+DEFINIENDO[Fases y componentes] en 5,10
+Componentes de la fase de Analisis:
+1)|Analisis lexico|
+2)|Analisis sintactico|
+3)|Analisis semantico|
+.FIN
+
+DEFINIENDO[Analisis lexico] en 3,7
+Programa que recibe como entrada el codigo fuente de otro programa=20
+(secuencia de caracteres) y produce una salida compuesta de tokens.
+La cadena de caracteres que conforman el programa  es despojado de=20
+comentarios, espacios en blancos y otros elementos superfluos.
+.FIN
+
+DEFINIENDO[Analisis sintactico] en 3,7
+La cadena de tokens resultante es alimentada a un programa conocido=20
+como parser (verifica secuencia  y disposici=F3n de los tokens).
+.FIN
+DEFINIENDO[Analisis semantico] en 3,7
+La fase de analisis semantico revisa el programa fuente para tratar de=20
+encontrar errores semanticos y re=FAne la informacion sobre los tipos=20
+para la fase posterior de generacion de codigo.
+.FIN
+
+DEFINIENDO[Analisis y sintesis] en 5,10
+Analisis: Divide al programa fuente en sus elementos componentes y=20
+crea una representacion intermedia.
+Se determina las operaciones que implica el programa fuente y se
+registra en una estructura jerarquica llamada arbol.
+La s=EDntesis requiere la tecnica m=E1s especializada.
+.FIN
+
+DEFINIENDO[Optimizacion de codigo] en 5,10
+La fase de optimizacion de codigo consiste en mejorar el codigo =
+intermedio,=20
+de modo que resulte un codigo maquina mas rapido de ejecutar.=20
+Esta fase de la etapa de sintesis es posible sobre todo si el traductor
+es un compilador
+.FIN</PRE></BODY></HTML>

@@ -72,18 +72,9 @@ export class EvaluacionResolver {
   async devolverEntrega(
     @Args('alumnoId', { type: () => Int }) alumnoId: number,
     @Args('asignacionId', { type: () => Int }) asignacionId: number,
-  ) {
-    return await this.evaluacionService.devolverEntrega(alumnoId, asignacionId);
-  }
-
-  @Mutation(() => Entrega, { name: 'desbloquearRespuestas' })
-  async desbloquearRespuestas(
-    @Args('alumnoId', { type: () => Int }) alumnoId: number,
-    @Args('asignacionId', { type: () => Int }) asignacionId: number,
-    @Args('desbloqueadas', { type: () => Boolean }) desbloqueadas: boolean,
     @Context() context: any,
   ) {
     this.alumnoService.requireRoles(context, [RolUsuario.MODERADOR, RolUsuario.ADMINISTRADOR]);
-    return await this.evaluacionService.desbloquearRespuestas(alumnoId, asignacionId, desbloqueadas);
+    return await this.evaluacionService.devolverEntrega(alumnoId, asignacionId);
   }
 }

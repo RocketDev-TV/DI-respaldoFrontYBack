@@ -14,6 +14,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import GenericPage from './pages/GenericPage';
 import SearchResults from './pages/SearchResults';
 import JflapTutorialPage from './pages/JflapTutorialPage';
+import Downloads from './pages/Downloads';
+import Presentations from './pages/Presentations';
 import { mockFiles } from './data/mockData';
 import { cerrarSesion, obtenerUsuarioLogueado } from './utils/localStorage';
 import './index.css';
@@ -24,7 +26,9 @@ const VISTAS_PANEL = {
   administrador: 'Panel de Administración',
 };
 
-const PROTECTED_COURSE_VIEWS = new Set([
+const PROTECTED_VIEWS = new Set([
+  'Descargas',
+  'Presentaciones',
   'Teoría de la Computación.',
   'Ambientes de Programacion.',
   'Compiladores',
@@ -86,7 +90,7 @@ function App() {
   };
 
   const handleNavigate = (view) => {
-    if (!usuarioLogueado && PROTECTED_COURSE_VIEWS.has(view)) {
+    if (!usuarioLogueado && PROTECTED_VIEWS.has(view)) {
       setCurrentView('Iniciar Sesión');
       return;
     }
@@ -99,6 +103,18 @@ function App() {
         return <Home onNavigate={handleNavigate} usuarioLogueado={usuarioLogueado} />;
       case 'Tutorial JFLAP':
         return <JflapTutorialPage onNavigate={handleNavigate} />;
+      case 'Descargas':
+        return usuarioLogueado ? (
+          <Downloads />
+        ) : (
+          <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
+        );
+      case 'Presentaciones':
+        return usuarioLogueado ? (
+          <Presentations />
+        ) : (
+          <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
+        );
       case 'Teoría de la Computación.':
         return usuarioLogueado ? (
           <Course courseName={currentView} currentPeriod={currentPeriod} onPeriodChange={setCurrentPeriod} 
@@ -153,7 +169,6 @@ function App() {
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
-      case 'Presentaciones':
       case 'Sobre Mi':
       case 'Tesis':
         return <GenericPage pageName={currentView} />;

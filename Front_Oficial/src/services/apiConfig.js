@@ -1,11 +1,18 @@
 const LOCAL_GRAPHQL_API_URL = 'http://localhost:3001/graphql';
 
 export function getGraphqlApiUrl() {
-  // Fuerza a leer la variable. Si no existe, usa la URL pública por defecto.
-  const configuredUrl = process.env.REACT_APP_GRAPHQL_API_URL || 'https://anton-server.tailb29b29.ts.net/graphql';
-  
-  console.log("URL de GraphQL configurada:", configuredUrl); // Esto nos dirá en la consola si la leyó
-  return configuredUrl;
+  const configuredUrl = process.env.REACT_APP_GRAPHQL_API_URL?.trim();
+
+  if (process.env.NODE_ENV === 'development') {
+    const useRemoteApi = process.env.REACT_APP_USE_REMOTE_API === 'true';
+    return useRemoteApi && configuredUrl ? configuredUrl : LOCAL_GRAPHQL_API_URL;
+  }
+
+  if (configuredUrl) {
+    return configuredUrl;
+  }
+
+  return '/graphql';
 }
 
 export function shouldUseMockGuion() {

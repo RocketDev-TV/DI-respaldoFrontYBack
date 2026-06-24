@@ -16,12 +16,15 @@ type Alumno {
 
 type Asignacion {
   activa: Boolean!
+  archivoRespuestas: String
   contenidoId: Int
   descripcion: String!
   entregable: Boolean!
   estado: String!
   grupo: String!
   id: ID!
+  mimeTypeRespuestas: String
+  nombreArchivoRespuestas: String
   orden: Int!
   periodo: Int!
   porcentaje: Int!
@@ -178,9 +181,7 @@ type Mutation {
   actualizarAsignacion(datos: UpdateAsignacionInput!): Asignacion!
   actualizarContenido(datos: UpdateContenidoInput!): Contenido!
   actualizarUnidad(updateUnidadInput: UpdateUnidadInput!): Unidad!
-
-  """Actualiza los datos de un usuario desde el panel de administración"""
-  actualizarUsuario(datos: UpdateUsuarioAdminInput!): Alumno!
+  actualizarUsuario(datos: UpdateUsuarioInput!): Alumno!
   actualizarVideo(datos: UpdateVideoInput!): Video!
   completarContenido(alumnoId: Int!, contenidoId: Int!): Alumno
   crearAlumno(datos: CreateAlumnoInput!): Alumno!
@@ -189,7 +190,6 @@ type Mutation {
   crearUnidad(createUnidadInput: CreateUnidadInput!): Unidad!
   crearUsuario(datos: CreateUsuarioInput!): Alumno!
   crearVideo(datos: CreateVideoInput!): Video!
-  desbloquearRespuestas(alumnoId: Int!, asignacionId: Int!, desbloqueadas: Boolean!): Entrega!
   devolverEntrega(alumnoId: Int!, asignacionId: Int!): Boolean!
   eliminarAsignacion(id: Int!): Asignacion!
   eliminarContenido(id: Int!): Contenido!
@@ -318,7 +318,7 @@ input UpdateUnidadInput {
   nombre: String
 }
 
-input UpdateUsuarioAdminInput {
+input UpdateUsuarioInput {
   apellido: String
   email: String
   estado: EstadoUsuario

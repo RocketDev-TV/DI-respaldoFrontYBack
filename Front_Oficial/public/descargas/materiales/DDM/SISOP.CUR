@@ -1,0 +1,98 @@
+DEFINIENDO [Sistemas    OperativoS] COLOR TAMARILLO/FAZULCIELO,TAMARILLO/FAZULCIELO,TAZUL/FAZULCIELO,TROJO/FAZULCIELO
+DEFINICION
+|Que es un sistema operativo|
+CLASIFICACION DE SISTEMAS OPERATIVOS
+|Por lotes|
+|Por multiprogramacion|
+|Multiusuario|
+|De tiempo real|
+|De tiempo compartido|
+ELEMENTOS DE LOS SO
+|Nucleo|
+|Interface|
+|Memoria|
+.fin
+
+DEFINIENDO [Que es un sistema operativo] en -1,-1
+Un sistema operativo (SO) es un conjunto de programas que permite a los usuarios
+administrar todos los recursos de la computadora,tales como discos, impresoras,
+teclado, cpu, memorias, etc. El sistema operativo puede verse como el alma
+de la computadora, sin ellos las computadoras serian un conjunto de circuitos
+sin vida. El sistema operativo mas utilizado hoy en dia por las PCs del mundo
+es Windows en sus diferentes veriones. Un sistema operativo para PC esta resi
+dente en disco de modo que necesita ser leido y cargado por la computadora y
+desde ese momento el usuario maneja el SO.
+
+- El SO es el software basico de la computadora
+- El conjunto de elementos que interactuan entre el usuario y el hardware.
+- El conjunto de elementos que integran los SO son subsistemas como
+  Administrador de memoria, administrador de dispositivos y administrador de
+  la inforamcion.
+- Existen un gran numero de programas que integran a los SO, estos son los
+  cargadores, ensambladores, compiladores, editores, etc.
+- Un SO administra todos los dispositivos fisicos conectados y configurados a
+  la computadora. Ademas proporciona la facilidad para que los usuarios se
+  comuniquen con la pc y sirve de plataforma a partir de la cual se corren los programas de aplicacion.
+
+.fin
+
+DEFINIENDO [Por lotes] en -1,-1
+Los SO por lotes requieren que la informacion este reunida en lotes (paquetes).
+Los lotes son procesados por orden de admision, segun el modelo de FCFS. En estos
+sistemas la memoria se divide en dos zonas.
+- Ocupado por el sistema operativo
+- Se usa para cargar programaas trasncritos para su ejecucion
+  Cuando se termina la ejecucion de un programa se carga un nuevo programa en
+  la misma zona de memoria
+.fin
+
+DEFINIENDO [Por multiprogramacion] en -1,-1
+Los so de multiprogramacion son capaces de soportar dos o mas procesos concurrentes
+multiples, permiten que residan al mismo tiempo en la memoria primaria las instruc-
+ciones y los datos procedentes de dos o mas procesos. Estos sistemas implican la
+operacion de multiproceso para manejar la informacion
+.fin
+
+
+DEFINIENDO [Multiusuario] en -1,-1
+Los SO multiusuario permiten acceder simultaneamente a un sistema de computadoras
+a traves de dos o mas terminales. Este tipo de sistema es fundamenteal en el manejo
+de redes de computadoras
+.fin
+
+DEFINIENDO [De tiempo compartido] en -1,-1
+Estos sistemas tratan de proporcionar un reparto de los recursos comunes para
+dar la impresion a los usuarios que poseen una computadora independiente.
+En estos sistemas el administrador de la memoria proporciona aislamiento y
+proteccion de los programas ya que generalmente no tienen necesidad de comunicarse
+entre ellos
+.fin
+
+DEFINIENDO [De tiempo real] en -1,-1
+Estos tienen como objetivo proporcionar tiempos mas rapidos de respuesta,
+procesar informacion sin tiempos muertos. En estos sistemas el administrador
+de memoria es menos solicidato debido a que muchos procesos residen
+permanentemente en la memoria.
+.fin
+
+DEFINIENDO [Nucleo] en -1,-1 
+Es el nucleo del sistema operativo, modulo principal que provee todos los
+servicios escenciales y necesarios para el funcionamiento de las aplicaciones
+y dispositivos que manejara el sistema operativo. Se recomienda no hacerle
+modificaciones. Generalmente el nucleo es un codigo que es cargado en memoria
+cuando la computadora inicia, el cual permite administrar dispositovs como
+unidades de almacenamiento.
+.fin
+
+DEFINIENDO [Interface] en -1,-1
+Tambien conocida GUI(graphics user interface). Se encarga de establecer la
+comunicacion con los usuarios y puede tener dos apariencias: De consola o
+puede ser grafica. Linux tiene GUI's como GNOME y KDE.
+.fin
+
+DEFINIENDO [Memoria] en -1,-1
+Son los dispositivos donde se almacenan los datos con los que trabaja el
+sistema operativo. Las memorias pueden ser temporales, permanentes, de solo
+lectura o de lectura o escritura. El sistema operativo hace uso de cada
+una de ella para su correcto funcionamiento.
+.fin

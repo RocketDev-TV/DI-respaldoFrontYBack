@@ -204,7 +204,7 @@ export async function actualizarUsuario(payload) {
   const passwordSeguro = payload.password ? await encryptPassword(payload.password) : undefined;
   const data = await graphqlRequest(
     `
-      mutation ActualizarUsuario($datos: UpdateUsuarioAdminInput!) {
+      mutation ActualizarUsuario($datos: UpdateUsuarioInput!) {
         actualizarUsuario(datos: $datos) {
           id
           nombre
